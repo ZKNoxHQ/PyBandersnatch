@@ -29,37 +29,49 @@ class Fp():
         return self.Element(mpz_random(self._rand_state, self.p), self)
                 
 
-
     class Element:
         def __init__(self, value, field):
             self.value = value % field.p
             self.field = field
         
         def __eq__(self,other):
-            if isinstance(other, self.field.Element) and self.field == other.field:
+            if isinstance(other, int):
+                return self.value == other % self.field.p
+            elif isinstance(other, self.field.Element) and self.field == other.field:
                 return self.value == other.value 
             raise TypeError("Cannot add elements from different fields.")
         
         def __add__(self, other):
-            if isinstance(other, self.field.Element) and self.field == other.field:
+            if isinstance(other, int):
+                return self+self.field(other)
+            elif isinstance(other, self.field.Element) and self.field == other.field:
                 return self.field(self.value + other.value) # TODO SOMETIMES DO `% self.field.p`
             raise TypeError("Cannot add elements from different fields.")
 
+        def __radd__(self,other):
+            return self+other
+        
         def __neg__(self):
             return self.field(-self.value % self.field.p)
         
         def __sub__(self, other):
-            if isinstance(other, self.field.Element) and self.field == other.field:
+            if isinstance(other, int):
+                return self-self.field(other)
+            elif isinstance(other, self.field.Element) and self.field == other.field:
                 return self.field(self.value - other.value) # TODO SOMETIMES DO `% self.field.p)`
             raise TypeError("Cannot subtract elements from different fields.")
 
         def __mul__(self, other):
-            if isinstance(other, self.field.Element) and self.field == other.field:
+            if isinstance(other, int):
+                return self*self.field(other)
+            elif isinstance(other, self.field.Element) and self.field == other.field:
                 return self.field((self.value * other.value) % self.field.p)
             raise TypeError("Cannot multiply elements from different fields.")
 
+        def __rmul__(self,other):
+            return self * other
+        
         def __pow__(self, exponent):
-            # Raise the element to the power of `exponent` modulo `modulus`
             result = powmod(self.value, exponent, self.field.p)
             return self.field(result)
 
@@ -69,9 +81,11 @@ class Fp():
             if self.value==0:
                 return True
             else:
-                return self ** ((self.field.p-1)>>1) == self.field(1)
+                return self ** ((self.field.p-1)>>1) == 1
 
         def __truediv__(self, other):
+            if isinstance(other, int):
+                return self/self.field(other)
             if isinstance(other, self.field.Element) and self.field == other.field:
                 inverse_other = invert(other.value, self.field.p)
                 return self.field((self.value * inverse_other) % self.field.p)
@@ -102,13 +116,13 @@ class Fp():
             t = self**Q
             r = self**((Q+1)>>1)
             # TODO REMOVE THIS CHECK
-            assert(t**(1<<self.field.two_adicity) == self.field(1))
+            assert(t**(1<<self.field.two_adicity) == 1)
 
-            while t != self.field(1):
+            while t != 1:
                 # Find the least i (0 < i < m) such that t^(2^i) ≡ 1 (mod p)
                 t2i = t
                 i = 0
-                while t2i != self.field(1):
+                while t2i != 1:
                     t2i = t2i**2
                     i+=1
                     
@@ -119,10 +133,10 @@ class Fp():
                 t = t*c
                 r = r*b
                 
-            return r if t == self.field(1) else None
+            return r if t == 1 else None
     
 
-class TestFp(unittest.TestCase, Fp):
+class TestFp(unittest.TestCase):
 
     def test_random(self):
         F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
@@ -133,7 +147,7 @@ class TestFp(unittest.TestCase, Fp):
 
     def test_mul(self):
         F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
-        a = F(12345)
+        a = 12345
         b = F(54321)
         a_mul_b = F(670592745)
         self.assertEqual(a_mul_b, a*b)
