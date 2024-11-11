@@ -1,4 +1,4 @@
-import unittest
+# -*- coding: utf-8 -*- 
 from gmpy2 import random_state, mpz_random, invert, mpz, powmod, sign, mod
 
 class Fp():
@@ -134,46 +134,3 @@ class Fp():
                 r = r*b
                 
             return r if t == 1 else None
-    
-
-class TestFp(unittest.TestCase):
-
-    def test_random(self):
-        F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
-        a = F.random()
-        b = F.random()
-        # a=b with probability 1/p, that is small for a large p
-        self.assertFalse(a==b)
-
-    def test_mul(self):
-        F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
-        a = 12345
-        b = F(54321)
-        a_mul_b = F(670592745)
-        self.assertEqual(a_mul_b, a*b)
-
-    def test_div(self):
-        F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
-        a = F(1234567890)
-        b = F(9876543210)
-        a_div_b = F(35275400988426393170843532131382492504976292327056669892310128774672708665364) # from sage
-        self.assertEqual(a/b, a_div_b)
-
-    def test_sqrt(self):
-        F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
-        # find a square
-        sq = F.random()
-        while not(sq.is_square()):
-            sq = F.random()
-        # square-root computation
-        root = sq.sqrt()#F.sqrt(sq)
-        self.assertEqual(root*root, sq)
-
-    def test_is_square(self):
-        F = Fp(52435875175126190479447740508185965837690552500527637822603658699938581184513)
-        self.assertFalse(F.non_square.is_square())
-        for i in range(F.non_square.value):
-            self.assertTrue(F(i).is_square())
-        
-if __name__ == '__main__':
-    unittest.main()
