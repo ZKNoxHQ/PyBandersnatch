@@ -213,6 +213,8 @@ class Curve:
         def glv(self, k):
             """GLV scalar multiplication `k`*`self`.
 
+            Reference:
+            https://www.iacr.org/archive/crypto2001/21390189.pdf
             More information in the file `φ.sage`.
 
             """
