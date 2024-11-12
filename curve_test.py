@@ -157,6 +157,17 @@ class TestCurve(unittest.TestCase):
     #         time_glv/time_naive*100))
     #     self.assertEqual(k_times_p_glv, k_times_p_naive)
 
+    def test_generator(self):
+        """Generator of the subgroup of size r"""
+        E, test_vectors = self.set_up_curve()
+        # Small x generator
+        x = 1
+        while (x**3 + E.a*x**2 + x).is_square() or not (E(E.field(x), 1).is_prime_order(E.r)):  # B is non square!
+            x += 1
+        g = E(E.field(x), 1)
+        self.assertTrue(g.is_prime_order(E.r))
+        self.assertEqual(g, E.generator)
+
 
 if __name__ == '__main__':
     unittest.main()

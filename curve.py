@@ -5,13 +5,13 @@ from gmpy2 import mpq
 
 class Curve:
     def __init__(self, a, b, r, h):
-        # TODO check a and d are defined on the same field?
         self.field = a.field
         self.a = a
         self.b = b
         self.r = r
         self.h = h
         self.a24 = (self.a+2)/4
+        self.generator = self.Point(self.field(0xa), 1, self)
 
     def __repr__(self):
         return "Montgomery curve defined by {}*y^2 = x^3 + {}*x^2 + x".format(self.b, self.a)
