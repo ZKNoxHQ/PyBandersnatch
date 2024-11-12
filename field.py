@@ -26,6 +26,7 @@ class Field():
         return self.Element(value, self)
 
     def random(self):
+        """Compute a random element of `self`."""
         # probably not secure
         return self.Element(mpz_random(self._rand_state, self.p), self)
 
@@ -35,6 +36,7 @@ class Field():
             self.field = field
 
         def __eq__(self, other):
+            """Return the equality boolean between `self` and `other`."""
             if isinstance(other, int):
                 return self.value == other % self.field.p
             elif isinstance(other, self.field.Element) and self.field == other.field:
@@ -42,6 +44,7 @@ class Field():
             raise TypeError("Cannot add elements from different fields.")
 
         def __add__(self, other):
+            """Addition of `self` and `other`."""
             if isinstance(other, int):
                 return self+self.field(other)
             elif isinstance(other, self.field.Element) and self.field == other.field:
@@ -50,12 +53,15 @@ class Field():
             raise TypeError("Cannot add elements from different fields.")
 
         def __radd__(self, other):
+            """Addition when `other` is given first (mostly for `int` type)."""
             return self+other
 
         def __neg__(self):
+            """Negation of `self`."""
             return self.field(-self.value % self.field.p)
 
         def __sub__(self, other):
+            """Difference of `self` and `other`."""
             if isinstance(other, int):
                 return self-self.field(other)
             elif isinstance(other, self.field.Element) and self.field == other.field:
@@ -64,6 +70,7 @@ class Field():
             raise TypeError("Cannot subtract elements from different fields.")
 
         def __mul__(self, other):
+            """Multiplication of `self` and `other`."""
             if isinstance(other, int):
                 return self*self.field(other)
             elif isinstance(other, self.field.Element) and self.field == other.field:
@@ -71,14 +78,16 @@ class Field():
             raise TypeError("Cannot multiply elements from different fields.")
 
         def __rmul__(self, other):
+            """Multiplication when `other` is given first (mostly for `int` type)."""
             return self * other
 
         def __pow__(self, exponent):
+            """Modular exponentiation `self` to the power `exponent`."""
             result = powmod(self.value, exponent, self.field.p)
             return self.field(result)
 
         def is_square(self):
-            # return 0 if x=0, 1 if x is a non-zero square mod p, and -1 if it is not a square
+            """Legendre symbol of `self`."""
             # TODO optimize the case (p,q) = (q,p) * something
             if self.value == 0:
                 return True
@@ -86,6 +95,7 @@ class Field():
                 return self ** ((self.field.p-1) >> 1) == 1
 
         def __truediv__(self, other):
+            """Division of `self` by `other` modulo `self.field.p`."""
             if isinstance(other, int):
                 return self/self.field(other)
             if isinstance(other, self.field.Element) and self.field == other.field:
@@ -98,9 +108,15 @@ class Field():
             return f"{self.value}"
 
         def sqrt(self):
-            # Return the square root (mod p) or None if no solution exists
-            # from https://www.lvzl.fr/teaching/2020-21/docs/AA-devoir-1-sujet.pdf
-            # and https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm
+            """Square root of `self`.
+
+            Computed using Tonelli-Shanks algorithm.
+            Assumes that `self` is a square.
+            Details here:
+            https://www.lvzl.fr/teaching/2020-21/docs/AA-devoir-1-sujet.pdf
+            https://en.wikipedia.org/wiki/Tonelli%E2%80%93Shanks_algorithm
+
+            """
 
             if self.value == 0:
                 return self

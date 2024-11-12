@@ -22,15 +22,28 @@ class Curve:
         return self.Point(x, z, self)
 
     def random(self):
+        """Returns a random point of `self`."""
         x = self.field.random()
         while not (((x**3 + self.a*x**2 + x) / self.b).is_square()):
             x = self.field.random()
         return self.Point(x, 1, self)
 
     def j_inv(self):
+        """Returns the j-invariant of `self`.
+
+        Reference:
+        https://eprint.iacr.org/2017/212.pdf page 3.
+
+        """
         return 256 * (self.a**2 - 3)**3 / (self.a**2-4)
 
     def weierstrass(self):
+        """Weierstrass coefficients of `self`.
+
+        Reference:
+        https://eprint.iacr.org/2017/212.pdf page 6.
+
+        """
         return [-(self.a**2)/3+1, self.a*((self.a**2)*2/9-1)/3]
 
     class Point:
@@ -43,84 +56,103 @@ class Curve:
             return "Point ({}, {})".format(self.x, self.z)
 
         def __eq__(self, other):
-            return (self.z == 0 and other.z == 0) or self.x * other.z == other.x * self.z
+            """Return the equality boolean between `self` and `other`.
+
+            Points are represented in projective coordinates.
+            The equality is defined modulo {±1}.
+            """
+            return self.x * other.z == other.x * self.z
 
         def normalize(self):
+            """Affine representation of the projective point."""
             if self.z == 0:
                 return self.curve(1, 0)
             return self.curve(self.x/self.z, 1)
 
         def in_curve(self, twist=False):
+            """Returns the curve membership boolean."""
             if self.z == 0:
                 return True
             x = self.x/self.z
             # `not()` because self.curve.b is a non-square!
             return not ((x**3 + self.curve.a*x**2 + x).is_square()) + twist == 1
 
-        def weierstrass(self):
-            x = self.x
-            z = self.z
-            if z == 0:
-                return [0, 1, 0]
-            xn = x/z
-            return xn+self.curve.a/3
-
         def dbl(self):
-            # [2]P, in the xz-model
-            # eprint 2017/212 algo 2
+            """Doubling algorithm.
+
+            Reference:
+            https://eprint.iacr.org/2017/212.pdf algorithm 2.
+
+            """
             x = self.x
             z = self.z
             v1 = x+z
             v1 = v1**2
             v2 = x-z
             v2 = v2**2
-            xR = v1*v2
+            x_r = v1*v2
             v1 = v1-v2
             v3 = self.curve.a24*v1
             v3 = v3+v2
-            zR = v1*v3
-            return self.curve(xR, zR)
+            z_r = v1*v3
+            return self.curve(x_r, z_r)
 
-        def add(self, Q, PmQ):
-            # P+Q, in the xz-model
-            xP, zP = self.x, self.z
-            xQ, zQ = Q.x, Q.z
-            xm, zm = PmQ.x, PmQ.z
-            v0 = xP + zP
-            v1 = xQ - zQ
+        def add(self, q, p_minus_q):
+            """Addition algorithm.
+
+            Requires p_minus_q.
+            Reference:
+            https://eprint.iacr.org/2017/212.pdf algorithm 1.
+
+            """
+            x_p, z_p = self.x, self.z
+            x_q, zQ = q.x, q.z
+            xm, zm = p_minus_q.x, p_minus_q.z
+            v0 = x_p + z_p
+            v1 = x_q - zQ
             v1 = v1 * v0
-            v0 = xP - zP
-            v2 = xQ + zQ
+            v0 = x_p - z_p
+            v2 = x_q + zQ
             v2 = v2*v0
             v3 = v1+v2
             v3 = v3**2
             v4 = v1-v2
             v4 = v4**2
-            xR = zm * v3
-            zR = xm * v4
-            return self.curve(xR, zR)
+            x_r = zm * v3
+            z_r = xm * v4
+            return self.curve(x_r, z_r)
 
         def naive_mul(self, k):
-            # R = [k]P, in the xz-model
+            """Scalar multiplication `k` * `self`.
+
+            Reference:
+            https://eprint.iacr.org/2017/212.pdf algorithm 3.
+
+            """
             if k == 0:
-                return self.curve(1, 0)  # Smith notation
-            k = abs(k)  # function does not care about sign(k)
-            R0 = self
-            R1 = R0.dbl()
+                return self.curve(1, 0)
+            k = abs(k)  # computation modulo {±1}
+            r0 = self
+            r1 = r0.dbl()
             i = 0
-            R1mR0 = R0
+            r1_minus_r0 = r0
             k_bits = [int(bit) for bit in bin(k)[2:]]
             for i in range(1, len(k_bits)):
                 if k_bits[i] == 0:
-                    [R0, R1] = [R0.dbl(), R0.add(R1, R1mR0)]
+                    [r0, r1] = [r0.dbl(), r0.add(r1, r1_minus_r0)]
                 else:
-                    [R0, R1] = [R0.add(R1, R1mR0), R1.dbl()]
-            if R0.z == 0:
+                    [r0, r1] = [r0.add(r1, r1_minus_r0), r1.dbl()]
+            if r0.z == 0:
                 return self.curve(1, 0)
-            return R0
+            return r0
 
         def multi_scalar_mul(self, k1, other, k2, other_minus_self):
-            # Algorithm 9 of https://eprint.iacr.org/2017/212.pdf
+            """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
+
+            Reference:
+            https://eprint.iacr.org/2017/212.pdf Algorithm 9.
+
+            """
             s0, s1, P0, P1, Pm = k1, k2, self, other, other_minus_self
 
             # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
@@ -149,18 +181,27 @@ class Curve:
             return P1
 
         def is_prime_order(self, N):
-            # True if self is of order N, False else.
+            """Returns the boolean corresponding to `self.order() == N`."""
             return self.naive_mul(N).z == 0 and self.z != 0
 
         def φ(self):
-            # from eprint 2021/1152
+            """Endomorphism sqrt(-2).
+
+            Reference:
+            https://eprint.iacr.org/2021/1152.pdf page 6.
+
+            """
             x = self.x
             z = self.z
-            c = self.curve.a+2  # TODO can be hardcoded but it is not a big deal
+            c = self.curve.a+2  # TODO can be hard-coded
             return self.curve(-(x-z)**2-c*x*z, 2*x*z)
 
         def φ_minus_one(self):
-            # see the derivation in `φ.sage`
+            """Endomorphism sqrt(-2) - [1].
+
+            More information in the file `φ.sage`.
+
+            """
             α = self.curve.field(
                 13017314467421381532402061398313046228820690393386411611562176812113295071440)
             β = self.curve.field(
@@ -170,7 +211,11 @@ class Curve:
             return self.curve(α * self.x * (self.x + self.z * β)**2, self.z * (self.x + γ * self.z)**2)
 
         def glv(self, k):
-            # see `φ.sage` (GLV decomposition)
+            """GLV scalar multiplication `k`*`self`.
+
+            More information in the file `φ.sage`.
+
+            """
             M1 = [113482231691339203864511368254957623327,
                   10741319382058138887739339959866629956]
             M2 = [21482638764116277775478679919733259912, -
@@ -185,4 +230,9 @@ class Curve:
             return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one())
 
         def __rmul__(self, k):
+            """Scalar multiplication with the scalar give first.
+
+            Computed using GLV.
+
+            """
             return self.glv(k)
