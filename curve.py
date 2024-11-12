@@ -151,18 +151,18 @@ class Curve:
             while s1 % 2 == 0:
                 s1, P1 = s1>>2, P1.dbl()
             if s1 > 1:
-                P1 = s1*P1
+                P1 = P1.naive_mul(s1)
             return P1
         
         def is_prime_order_point(self, N) :
             # True if self is of order N, False else.
-            return (N*self).z == 0 and self.z != 0
+            return self.naive_mul(N).z == 0 and self.z != 0
 
         def φ(self):
             # from eprint 2021/1152
             x = self.x
             z = self.z
-            c = self.curve.a+2# TODO can be hardcoded but it is not a big deal
+            c = self.curve.a+2 # TODO can be hardcoded but it is not a big deal
             return self.curve(-(x-z)**2-c*x*z, 2*x*z)
         
         def φ_minus_one(self):
@@ -182,6 +182,7 @@ class Curve:
             b = [round(mpq(k*N1[0],det)), round(mpq(k*N1[1],det))]
             k1 = k-b[0] * M1[0] - b[1] * M2[0]
             k2 = -b[0] * M1[1] -b[1] * M2[1]
+            
             return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one())
 
         def __rmul__(self,k):
