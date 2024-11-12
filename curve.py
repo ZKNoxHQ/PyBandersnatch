@@ -153,7 +153,7 @@ class Curve:
             https://eprint.iacr.org/2017/212.pdf Algorithm 9.
 
             """
-            s0, s1, P0, P1, Pm = k1, k2, self, other, other_minus_self
+            s0, s1, p0, p1, pm = k1, k2, self, other, other_minus_self
 
             # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
             while s0 < 0:
@@ -163,22 +163,22 @@ class Curve:
 
             while s0 != 0:
                 if s1 < s0:
-                    s0, s1, P0, P1, Pm, = s1,    s0,         P1,            P0,       Pm
+                    s0, s1, p0, p1, pm, = s1,    s0,         p1,            p0,       pm
                 if s1 <= 4*s0:
-                    s0, s1, P0, P1, Pm, = s0,    s1 - \
-                        s0,      P1.add(P0, Pm), P1,       P0
+                    s0, s1, p0, p1, pm, = s0,    s1 - \
+                        s0,      p1.add(p0, pm), p1,       p0
                 elif s0 % 2 == s1 % 2:
-                    s0, s1, P0, P1, Pm, = s0,    (s1 -
-                                                  s0) >> 1, P1.add(P0, Pm), P1.dbl(), Pm
+                    s0, s1, p0, p1, pm, = s0,    (s1 -
+                                                  s0) >> 1, p1.add(p0, pm), p1.dbl(), pm
                 elif s1 % 2 == 0:
-                    s0, s1, P0, P1, Pm, = s0,    s1 >> 1,      P0,            P1.dbl(), P1.add(Pm, P0)
+                    s0, s1, p0, p1, pm, = s0,    s1 >> 1,      p0,            p1.dbl(), p1.add(pm, p0)
                 else:
-                    s0, s1, P0, P1, Pm, = s0 >> 1, s1,         P0.dbl(),      P1,       P0.add(Pm, P1)
+                    s0, s1, p0, p1, pm, = s0 >> 1, s1,         p0.dbl(),      p1,       p0.add(pm, p1)
             while s1 % 2 == 0:
-                s1, P1 = s1 >> 2, P1.dbl()
+                s1, p1 = s1 >> 2, p1.dbl()
             if s1 > 1:
-                P1 = P1.naive_mul(s1)
-            return P1
+                p1 = p1.naive_mul(s1)
+            return p1
 
         def is_prime_order(self, N):
             """Returns the boolean corresponding to `self.order() == N`."""
