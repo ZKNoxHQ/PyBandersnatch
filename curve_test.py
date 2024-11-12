@@ -52,17 +52,17 @@ class TestCurve(unittest.TestCase):
     def test_random(self):
         E, _ = self.set_up_curve()
         for i in range(10):
-            P = E.random().naive_mul(E.h)
-            self.assertTrue(P.is_prime_order_point(E.r))
+            p = E.random().naive_mul(E.h)
+            self.assertTrue(p.is_prime_order(E.r))
 
-    def test_is_prime_order_point(self):
+    def test_is_prime_order(self):
         E, test_vecs = self.set_up_curve()
-        self.assertTrue(test_vecs['p'].is_prime_order_point(E.r))
+        self.assertTrue(test_vecs['p'].is_prime_order(E.r))
 
     def test_φ_norm(self):
         E, test_vecs = self.set_up_curve()
-        φ2P = test_vecs['p'].φ().φ()
-        self.assertEqual(φ2P, test_vecs['p_double'])
+        φ2_p = test_vecs['p'].φ().φ()
+        self.assertEqual(φ2_p, test_vecs['p_double'])
 
     def test_φ_eigenvalue(self):
         E, test_vecs = self.set_up_curve()
@@ -70,8 +70,8 @@ class TestCurve(unittest.TestCase):
 
     def test_φ(self):
         E, test_vecs = self.set_up_curve()
-        φP = test_vecs['p'].φ()
-        self.assertEqual(φP, test_vecs['φ_p'])
+        φ_p = test_vecs['p'].φ()
+        self.assertEqual(φ_p, test_vecs['φ_p'])
 
     def test_φ_minus_one(self):
         E, test_vecs = self.set_up_curve()
@@ -80,46 +80,46 @@ class TestCurve(unittest.TestCase):
 
     def test_add(self):
         E, test_vecs = self.set_up_curve()
-        Q = test_vecs['q']
-        PmQ = test_vecs['p_minus_q']
-        PpQ = test_vecs['p'].add(Q, PmQ)
-        self.assertEqual(PpQ, test_vecs['p_plus_q'])
+        q = test_vecs['q']
+        p_minus_q = test_vecs['p_minus_q']
+        p_plus_q = test_vecs['p'].add(q, p_minus_q)
+        self.assertEqual(p_plus_q, test_vecs['p_plus_q'])
 
     def test_dbl(self):
         E, test_vecs = self.set_up_curve()
-        Pdbl = test_vecs['p'].dbl()
-        self.assertEqual(Pdbl, test_vecs['p_double'])
+        p_double = test_vecs['p'].dbl()
+        self.assertEqual(p_double, test_vecs['p_double'])
 
     def test_scalar_mul(self):
         E, test_vecs = self.set_up_curve()
         k = test_vecs['k']
-        kP = test_vecs['p'].naive_mul(k)
-        self.assertEqual(kP, test_vecs['k_times_p'])
+        k_times_p = test_vecs['p'].naive_mul(k)
+        self.assertEqual(k_times_p, test_vecs['k_times_p'])
 
         k1 = test_vecs['k1']
-        k1P = test_vecs['p'].naive_mul(k1)
-        self.assertEqual(k1P, test_vecs['k1_times_p'])
+        k1_times_p = test_vecs['p'].naive_mul(k1)
+        self.assertEqual(k1_times_p, test_vecs['k1_times_p'])
 
         k2 = test_vecs['k2']
-        k2P = test_vecs['p'].naive_mul(k2)
-        self.assertEqual(k2P, test_vecs['k2_times_p'])
+        k2_times_p = test_vecs['p'].naive_mul(k2)
+        self.assertEqual(k2_times_p, test_vecs['k2_times_p'])
 
     def test_multi_scalar_mul(self):
         E, test_vecs = self.set_up_curve()
         F = E.field
-        Q = test_vecs['q']
-        PmQ = test_vecs['p_minus_q']
+        q = test_vecs['q']
+        p_minus_q = test_vecs['p_minus_q']
         k1 = test_vecs['k1']
         k2 = test_vecs['k2']
-        k1_p_plus_k2_q = test_vecs['p'].multi_scalar_mul(k1, Q, k2, PmQ)
+        k1_p_plus_k2_q = test_vecs['p'].multi_scalar_mul(k1, q, k2, p_minus_q)
         self.assertEqual(
             k1_p_plus_k2_q, test_vecs['k1_times_p_plus_k2_times_q'])
 
     def test_glv(self):
         E, test_vecs = self.set_up_curve()
         k = test_vecs['k']
-        kP = test_vecs['p'].glv(k)
-        self.assertEqual(kP, test_vecs['k_times_p'])
+        k_times_p = test_vecs['p'].glv(k)
+        self.assertEqual(k_times_p, test_vecs['k_times_p'])
 
     def test_bench(self):
         from time import time
@@ -129,16 +129,16 @@ class TestCurve(unittest.TestCase):
 
         t = time()
         for i in range(50):
-            kP_glv = k*test_vecs['p']  # glv
+            k_times_p_glv = k*test_vecs['p']  # glv
         time_glv = time() - t
 
         t = time()
         for i in range(50):
-            kP_naive = test_vecs['p'].naive_mul(k)
+            k_times_p_naive = test_vecs['p'].naive_mul(k)
         time_naive = time()-t
         print("GLV is {:.0f}% faster than a scalar multiplication.".format(
             time_glv/time_naive*100))
-        self.assertEqual(kP_glv, kP_naive)
+        self.assertEqual(k_times_p_glv, k_times_p_naive)
 
 
 if __name__ == '__main__':

@@ -33,14 +33,6 @@ class Curve:
     def weierstrass(self):
         return [-(self.a**2)/3+1, self.a*((self.a**2)*2/9-1)/3]
 
-    # def getPointFromWeierstrass(self, P) :
-    #     if P[2] == 0 :
-    #         return point.Point(1, 0, self)
-    #     if P[2] == 1 :
-    #         return point.Point(P[0] - self.a/3, 1, self)
-    #     X, Y, Z = P[0]/P[2], P[1]/P[2], 1
-    #     return self.getPointFromWeierstrass([X,Y,Z])
-
     class Point:
         def __init__(self, x, z, curve):
             self.x = x
@@ -51,7 +43,7 @@ class Curve:
             return "Point ({}, {})".format(self.x, self.z)
 
         def __eq__(self, other):
-            return self.x * other.z == self.z * other.x
+            return (self.z == 0 and other.z == 0) or self.x * other.z == other.x * self.z
 
         def normalize(self):
             if self.z == 0:
@@ -72,9 +64,6 @@ class Curve:
                 return [0, 1, 0]
             xn = x/z
             return xn+self.curve.a/3
-
-        def equals(self, other):
-            return (self.z == 0 and other.z == 0) or self.x * other.z == other.x * self.z
 
         def dbl(self):
             # [2]P, in the xz-model
@@ -159,7 +148,7 @@ class Curve:
                 P1 = P1.naive_mul(s1)
             return P1
 
-        def is_prime_order_point(self, N):
+        def is_prime_order(self, N):
             # True if self is of order N, False else.
             return self.naive_mul(N).z == 0 and self.z != 0
 
