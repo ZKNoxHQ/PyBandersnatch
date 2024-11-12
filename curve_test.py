@@ -7,7 +7,11 @@ from curve import Curve
 class TestCurve(unittest.TestCase):
 
     def set_up_curve(self):
-        # Bandersnatch curve in montgomery model
+        """Creates Bandersnatch ellptic curve.
+
+        Test vectors generated using the file `curve_test_vectors.sage`.
+
+        """
         F = Field(
             0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)
         a = F(0x4247698f4e32ad45a293959b4ca17afa4a2d2317e4c6ce5023e1fd63d1b5de98)
@@ -15,7 +19,6 @@ class TestCurve(unittest.TestCase):
         r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
         h = 4
         E = Curve(a, b, r, h)
-        # obtained from `sage curve_test_vectors.sage`
         test_vectors = {}
         test_vectors['p'] = E(
             F(0x3d65d0dd26c89b6c1e111a4b7d4875a8fc60cc1a2191beba4f6c11f2fb1c2cbf), 1)
@@ -46,99 +49,113 @@ class TestCurve(unittest.TestCase):
         return E, test_vectors
 
     def test_j_invariant(self):
-        E, test_vecs = self.set_up_curve()
+        """The j-invariant of Bandersnatch is 8000."""
+        E, test_vectors = self.set_up_curve()
         self.assertEqual(E.j_inv(), 8000)
 
-    def test_random(self):
+    def test_cofactor(self):
+        """Checks that the multiplication by the cofactor `h` returns a prime order `r` point."""
         E, _ = self.set_up_curve()
         for i in range(10):
             p = E.random().naive_mul(E.h)
             self.assertTrue(p.is_prime_order(E.r))
 
     def test_is_prime_order(self):
-        E, test_vecs = self.set_up_curve()
-        self.assertTrue(test_vecs['p'].is_prime_order(E.r))
+        """Check that `p` is of prime order `r`."""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(test_vectors['p'].is_prime_order(E.r))
 
     def test_φ_norm(self):
-        E, test_vecs = self.set_up_curve()
-        φ2_p = test_vecs['p'].φ().φ()
-        self.assertEqual(φ2_p, test_vecs['p_double'])
+        """Check that φ²(P) = [-2]P."""
+        E, test_vectors = self.set_up_curve()
+        φ2_p = test_vectors['p'].φ().φ()
+        self.assertEqual(φ2_p, test_vectors['p_double'])
 
     def test_φ_eigenvalue(self):
-        E, test_vecs = self.set_up_curve()
-        self.assertEqual(test_vecs['p'].φ(), test_vecs['λ']*test_vecs['p'])
+        """Check that φ acts as [λ] on the corresponding eigen-space."""
+        E, test_vectors = self.set_up_curve()
+        self.assertEqual(test_vectors['p'].φ(),
+                         test_vectors['λ']*test_vectors['p'])
 
     def test_φ(self):
-        E, test_vecs = self.set_up_curve()
-        φ_p = test_vecs['p'].φ()
-        self.assertEqual(φ_p, test_vecs['φ_p'])
+        """φ using test vectors."""
+        E, test_vectors = self.set_up_curve()
+        φ_p = test_vectors['p'].φ()
+        self.assertEqual(φ_p, test_vectors['φ_p'])
 
     def test_φ_minus_one(self):
-        E, test_vecs = self.set_up_curve()
-        φ_minus_one_p = test_vecs['p'].φ_minus_one()
-        self.assertEqual(φ_minus_one_p, test_vecs['φ_minus_one_p'])
+        """φ-1 using test vectors."""
+        E, test_vectors = self.set_up_curve()
+        φ_minus_one_p = test_vectors['p'].φ_minus_one()
+        self.assertEqual(φ_minus_one_p, test_vectors['φ_minus_one_p'])
 
     def test_add(self):
-        E, test_vecs = self.set_up_curve()
-        q = test_vecs['q']
-        p_minus_q = test_vecs['p_minus_q']
-        p_plus_q = test_vecs['p'].add(q, p_minus_q)
-        self.assertEqual(p_plus_q, test_vecs['p_plus_q'])
+        """Addition using test vectors."""
+        E, test_vectors = self.set_up_curve()
+        q = test_vectors['q']
+        p_minus_q = test_vectors['p_minus_q']
+        p_plus_q = test_vectors['p'].add(q, p_minus_q)
+        self.assertEqual(p_plus_q, test_vectors['p_plus_q'])
 
     def test_dbl(self):
-        E, test_vecs = self.set_up_curve()
-        p_double = test_vecs['p'].dbl()
-        self.assertEqual(p_double, test_vecs['p_double'])
+        """Doubling using test vectors."""
+        E, test_vectors = self.set_up_curve()
+        p_double = test_vectors['p'].dbl()
+        self.assertEqual(p_double, test_vectors['p_double'])
 
     def test_scalar_mul(self):
-        E, test_vecs = self.set_up_curve()
-        k = test_vecs['k']
-        k_times_p = test_vecs['p'].naive_mul(k)
-        self.assertEqual(k_times_p, test_vecs['k_times_p'])
+        """Scalar multiplication using test vectors."""
+        E, test_vectors = self.set_up_curve()
+        k = test_vectors['k']
+        k_times_p = test_vectors['p'].naive_mul(k)
+        self.assertEqual(k_times_p, test_vectors['k_times_p'])
 
-        k1 = test_vecs['k1']
-        k1_times_p = test_vecs['p'].naive_mul(k1)
-        self.assertEqual(k1_times_p, test_vecs['k1_times_p'])
+        k1 = test_vectors['k1']
+        k1_times_p = test_vectors['p'].naive_mul(k1)
+        self.assertEqual(k1_times_p, test_vectors['k1_times_p'])
 
-        k2 = test_vecs['k2']
-        k2_times_p = test_vecs['p'].naive_mul(k2)
-        self.assertEqual(k2_times_p, test_vecs['k2_times_p'])
+        k2 = test_vectors['k2']
+        k2_times_p = test_vectors['p'].naive_mul(k2)
+        self.assertEqual(k2_times_p, test_vectors['k2_times_p'])
 
     def test_multi_scalar_mul(self):
-        E, test_vecs = self.set_up_curve()
+        """Multi scalar multiplication using test vectors."""
+        E, test_vectors = self.set_up_curve()
         F = E.field
-        q = test_vecs['q']
-        p_minus_q = test_vecs['p_minus_q']
-        k1 = test_vecs['k1']
-        k2 = test_vecs['k2']
-        k1_p_plus_k2_q = test_vecs['p'].multi_scalar_mul(k1, q, k2, p_minus_q)
+        q = test_vectors['q']
+        p_minus_q = test_vectors['p_minus_q']
+        k1 = test_vectors['k1']
+        k2 = test_vectors['k2']
+        k1_p_plus_k2_q = test_vectors['p'].multi_scalar_mul(
+            k1, q, k2, p_minus_q)
         self.assertEqual(
-            k1_p_plus_k2_q, test_vecs['k1_times_p_plus_k2_times_q'])
+            k1_p_plus_k2_q, test_vectors['k1_times_p_plus_k2_times_q'])
 
     def test_glv(self):
-        E, test_vecs = self.set_up_curve()
-        k = test_vecs['k']
-        k_times_p = test_vecs['p'].glv(k)
-        self.assertEqual(k_times_p, test_vecs['k_times_p'])
+        """GLV using test vectors."""
+        E, test_vectors = self.set_up_curve()
+        k = test_vectors['k']
+        k_times_p = test_vectors['p'].glv(k)
+        self.assertEqual(k_times_p, test_vectors['k_times_p'])
 
-    def test_bench(self):
-        from time import time
-        E, test_vecs = self.set_up_curve()
-        # k = test_vecs['k'] # this is curiously improving even better GLV...
-        k = 1199715452959664211345788999754554038123456678896406483911385998427296165917073  # random
+    # def test_bench(self):
+    #     from time import time
+    #     E, test_vectors = self.set_up_curve()
+    #     # k = test_vectors['k'] # this is curiously improving even better GLV...
+    #     k = 1199715452959664211345788999754554038123456678896406483911385998427296165917073  # random
 
-        t = time()
-        for i in range(50):
-            k_times_p_glv = k*test_vecs['p']  # glv
-        time_glv = time() - t
+    #     t = time()
+    #     for i in range(50):
+    #         k_times_p_glv = k*test_vectors['p']  # glv
+    #     time_glv = time() - t
 
-        t = time()
-        for i in range(50):
-            k_times_p_naive = test_vecs['p'].naive_mul(k)
-        time_naive = time()-t
-        print("GLV is {:.0f}% faster than a scalar multiplication.".format(
-            time_glv/time_naive*100))
-        self.assertEqual(k_times_p_glv, k_times_p_naive)
+    #     t = time()
+    #     for i in range(50):
+    #         k_times_p_naive = test_vectors['p'].naive_mul(k)
+    #     time_naive = time()-t
+    #     print("GLV is {:.0f}% faster than a scalar multiplication.".format(
+    #         time_glv/time_naive*100))
+    #     self.assertEqual(k_times_p_glv, k_times_p_naive)
 
 
 if __name__ == '__main__':

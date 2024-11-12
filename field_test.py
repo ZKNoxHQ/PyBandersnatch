@@ -6,7 +6,11 @@ from field import Field
 class TestField(unittest.TestCase):
 
     def set_up_field(self):
-        # bandersnatch base field
+        """Create bandersnatch base field.
+
+        Test vectors generated using the file `field_test_vectors.sage`.
+
+        """
         p = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
         F = Field(p)
         test_vectors = {}
@@ -26,38 +30,43 @@ class TestField(unittest.TestCase):
         return F, test_vectors
 
     def test_random(self):
-        F, test_vecs = self.set_up_field()
+        """Check if two random elements are different.
+
+        It happens with probability 1/`p`, small for large `p`."""
+        F, test_vectors = self.set_up_field()
         a = F.random()
         b = F.random()
-        # a=b with probability 1/p, that is small for a large p
         self.assertFalse(a == b)
 
     def test_mul(self):
-        F, test_vecs = self.set_up_field()
-        a = test_vecs['a']
-        b = test_vecs['b']
+        """Test vector multiplication test."""
+        F, test_vectors = self.set_up_field()
+        a = test_vectors['a']
+        b = test_vectors['b']
         a_mul_b = a*b
-        self.assertEqual(a_mul_b, test_vecs['a_mul_b'])
+        self.assertEqual(a_mul_b, test_vectors['a_mul_b'])
 
     def test_div(self):
-        F, test_vecs = self.set_up_field()
-        a = test_vecs['a']
-        b = test_vecs['b']
+        """Test vector division test."""
+        F, test_vectors = self.set_up_field()
+        a = test_vectors['a']
+        b = test_vectors['b']
         a_div_b = a/b
-        self.assertEqual(a_div_b, test_vecs['a_div_b'])
+        self.assertEqual(a_div_b, test_vectors['a_div_b'])
 
     def test_sqrt(self):
-        F, test_vecs = self.set_up_field()
-        # find a square
-        sq = test_vecs['b']
+        """Test vector square root test."""
+        F, test_vectors = self.set_up_field()
+        sq = test_vectors['b']
         root = sq.sqrt()
         self.assertEqual(root*root, sq)
         self.assertTrue(
-            root == test_vecs['sqrt_b'] or root == -test_vecs['sqrt_b'])
+            root == test_vectors['sqrt_b'] or root == -test_vectors['sqrt_b'])
 
     def test_is_square(self):
-        F, test_vecs = self.set_up_field()
-        self.assertFalse(test_vecs['non_square'].is_square())
+        """Legendre symbol test on small squares and a non-square."""
+        F, test_vectors = self.set_up_field()
+        self.assertFalse(test_vectors['non_square'].is_square())
         for i in range(F.non_square.value):
             self.assertTrue(F(i).is_square())
 
