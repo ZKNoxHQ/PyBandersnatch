@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fp import Fp
+from field import Field
 from gmpy2 import mpq
 
 

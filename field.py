@@ -2,7 +2,7 @@
 from gmpy2 import random_state, mpz_random, invert, mpz, powmod, sign, mod
 
 
-class Fp():
+class Field():
 
     def __init__(self, p):
         self.p = mpz(p)

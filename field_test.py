@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import unittest
-from fp import Fp
+from field import Field
 
 
-class TestFp(unittest.TestCase):
+class TestField(unittest.TestCase):
 
     def set_up_field(self):
         # bandersnatch base field
         p = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
-        F = Fp(p)
+        F = Field(p)
         test_vectors = {}
         test_vectors['a'] = F(
             0x323f6ab2be9df186b32d48320a504c8841b51474108995013ca91c0b6dfaeb04)
@@ -20,7 +20,7 @@ class TestFp(unittest.TestCase):
             0x13cbd79f7463c1ca7cfd8c662c6b69d2ef3b2bf383be658c3217117a624973f3)
         test_vectors['a_div_b'] = F(
             0x3ddbe37f9605b5d0f48eabfb2bd0fbd1acd8100d6f7d1172171795192e50fc75)
-        test_vectors['nsq'] = F(0x5)
+        test_vectors['non_square'] = F(0x5)
         test_vectors['sqrt_b'] = F(
             0x2ca0f83ebf679a313a66801928cad698850f9b0f59a7e7f344e4929eeae32bc7)
         return F, test_vectors
@@ -57,7 +57,7 @@ class TestFp(unittest.TestCase):
 
     def test_is_square(self):
         F, test_vecs = self.set_up_field()
-        self.assertFalse(test_vecs['nsq'].is_square())
+        self.assertFalse(test_vecs['non_square'].is_square())
         for i in range(F.non_square.value):
             self.assertTrue(F(i).is_square())
 

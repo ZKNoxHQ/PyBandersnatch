@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
-from fp import Fp
+from field import Field
 from curve import Curve
 
 
@@ -8,7 +8,8 @@ class TestCurve(unittest.TestCase):
 
     def set_up_curve(self):
         # Bandersnatch curve in montgomery model
-        F = Fp(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)
+        F = Field(
+            0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)
         a = F(0x4247698f4e32ad45a293959b4ca17afa4a2d2317e4c6ce5023e1fd63d1b5de98)
         b = F(5)
         r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
