@@ -1,6 +1,5 @@
 # Bandersnatch, Montgomery model
-p = 52435875175126190479447740508185965837690552500527637822603658699938581184513
-Fp = GF(p)
+Fp = GF(52435875175126190479447740508185965837690552500527637822603658699938581184513)
 A = Fp(0x4247698f4e32ad45a293959b4ca17afa4a2d2317e4c6ce5023e1fd63d1b5de98)
 B = Fp(5)
 r = 13108968793781547619861935127046491459309155893440570251786403306729687672801
@@ -22,9 +21,9 @@ def to_mg(P):
     return x, y
 
 
-P = E(31511963179209183026886029814959507395230513391536014203721350106469568871776,
+p = E(31511963179209183026886029814959507395230513391536014203721350106469568871776,
       45347120062487836513813256222005391829075297965413648488198604153937949600247)
-Q = E(20252373884274151187306374916054971403178400027240398097441693977206289492028,
+q = E(20252373884274151187306374916054971403178400027240398097441693977206289492028,
       51776867226593987565156122032412653740536539297269422625045303422905294395870)
 k = 11997154529596648729624281997554038960651754640906483911385998427296165917073
 k1 = -45894336995428141233269187797940484884
@@ -32,18 +31,18 @@ k2 = 8683555061824981937504960049179714114
 λ = 8913659658109529928382530854484400854125314752504019737736543920008458395397
 
 
-def φ_minus_one(P):
+def φ_minus_one(p):
     # see `φ.sage`
-    X, Y = to_mg(P)
+    X, Y = to_mg(p)
     α = Fp(13017314467421381532402061398313046228820690393386411611562176812113295071440)
     β = Fp(14989411347484419666605643019079533103863186413725217032868654387860539633484)
     γ = Fp(39953720565912266872856944794434720047230584117801669040511822283402326025498)
     return α*X*(X+β)**2/(X+γ)**2
 
 
-def φ(P):
+def φ(p):
     # see rmX and smX in `φ.sage`
-    X, Y = to_mg(P)
+    X, Y = to_mg(p)
     a1 = 26217937587563095239723870254092982918845276250263818911301829349969290592256
     a2 = 14989411347484419663140498193005880785086916883037474254598401919095177670475
     a3 = 14989411347484419663140498193005880785086916883037474254598401919095177670477
@@ -52,11 +51,11 @@ def φ(P):
 # GENERATION OF TEST VECTORS
 
 
-def test_vector_point(P, name, ws=True):
+def test_vector_point(p, name, ws=True):
     if ws:
-        [x, y] = to_mg(P)
+        [x, y] = to_mg(p)
     else:
-        x = P
+        x = p
     print("test_vectors['{}'] = E(F({}), 1)".format(name, hex(x), 1))
 
 
@@ -64,17 +63,17 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
-test_vector_point(P, 'P')
-test_vector_point(Q, 'Q')
-test_vector_point(2*P, 'Pdbl')
-test_vector_point(P+Q, 'PpQ')
-test_vector_point(P-Q, 'PmQ')
-test_vector_point(φ(P), 'φP', False)
-test_vector_point(φ_minus_one(P), 'φ_minus_one_P', False)
-test_vector_point(k*P, 'kP')
-test_vector_point(k1*P, 'k1P')
-test_vector_point(k2*P, 'k2P')
-test_vector_point(k1*P + k2*Q, 'k1Ppk2Q')
+test_vector_point(p, 'p')
+test_vector_point(q, 'q')
+test_vector_point(2*p, 'p_double')
+test_vector_point(p+q, 'p_plus_q')
+test_vector_point(p-q, 'p_minus_q')
+test_vector_point(φ(p), 'φ_p', False)
+test_vector_point(φ_minus_one(p), 'φ_minus_one_p', False)
+test_vector_point(k*p, 'k_times_p')
+test_vector_point(k1*p, 'k1_times_p')
+test_vector_point(k2*p, 'k2_times_p')
+test_vector_point(k1*p + k2*q, 'k1_times_p_plus_k2_times_q')
 test_vector_scalar(k, 'k')
 test_vector_scalar(k1, 'k1')
 test_vector_scalar(k2, 'k2')

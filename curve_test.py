@@ -17,27 +17,27 @@ class TestCurve(unittest.TestCase):
         E = Curve(a, b, r, h)
         # obtained from `sage curve_test_vectors.sage`
         test_vectors = {}
-        test_vectors['P'] = E(
+        test_vectors['p'] = E(
             F(0x3d65d0dd26c89b6c1e111a4b7d4875a8fc60cc1a2191beba4f6c11f2fb1c2cbf), 1)
-        test_vectors['Q'] = E(
+        test_vectors['q'] = E(
             F(0x4f9ace66d99bf333dd1eb464c902fcc9217372d8902583ff2e65fb3df88fdbb8), 1)
-        test_vectors['Pdbl'] = E(
+        test_vectors['p_double'] = E(
             F(0x5f6aff9f5f3a3dedf24000ef9899766ccdadc2183675dac057d3d754faf6174), 1)
-        test_vectors['PpQ'] = E(
+        test_vectors['p_plus_q'] = E(
             F(0x6770424666db6f35101a26a4ea455b8886346935cb00298962781fa1f5f654af), 1)
-        test_vectors['PmQ'] = E(
+        test_vectors['p_minus_q'] = E(
             F(0x45d99562094ef0bfe61ffb151ce57cf76c7c3b247179cb3ebcee99c3e0a59889), 1)
-        test_vectors['φP'] = E(
+        test_vectors['φ_p'] = E(
             F(0x48850dbbc447be3c1f566275495c29ad981ed87de6818a73e1918a130a9b524d), 1)
-        test_vectors['φ_minus_one_P'] = E(
+        test_vectors['φ_minus_one_p'] = E(
             F(0x1521dba053303cfa98d4e0f358cea947c69d96f5bf8a8d3a075694b4c9b6558d), 1)
-        test_vectors['kP'] = E(
+        test_vectors['k_times_p'] = E(
             F(0x35d13b10631a46276be4c289a63570de6c552376605b2881e445031c90a96a7e), 1)
-        test_vectors['k1P'] = E(
+        test_vectors['k1_times_p'] = E(
             F(0x367b03140f02455d6d00a7924a65635f717f6354c23ccc2d5ed2b11e4b736c9d), 1)
-        test_vectors['k2P'] = E(
+        test_vectors['k2_times_p'] = E(
             F(0xd6643d2acb959c8f4306b8398ddf8102dbd9fcc52c17817e1bf7943cb8a40c7), 1)
-        test_vectors['k1Ppk2Q'] = E(
+        test_vectors['k1_times_p_plus_k2_times_q'] = E(
             F(0x182a5d0dce9c87ecd9050d911058c4ec30cbc680f94e5c347da06eb068c2dd15), 1)
         test_vectors['k'] = 0x1a862619b8224e61eb24bb583c84ce04913064d37308623924c7a64fcdc9f191
         test_vectors['k1'] = -0x2286ed83a0b1545d1b7788921e40bb14
@@ -57,68 +57,69 @@ class TestCurve(unittest.TestCase):
 
     def test_is_prime_order_point(self):
         E, test_vecs = self.set_up_curve()
-        self.assertTrue(test_vecs['P'].is_prime_order_point(E.r))
+        self.assertTrue(test_vecs['p'].is_prime_order_point(E.r))
 
     def test_φ_norm(self):
         E, test_vecs = self.set_up_curve()
-        φ2P = test_vecs['P'].φ().φ()
-        self.assertEqual(φ2P, test_vecs['Pdbl'])
+        φ2P = test_vecs['p'].φ().φ()
+        self.assertEqual(φ2P, test_vecs['p_double'])
 
     def test_φ_eigenvalue(self):
         E, test_vecs = self.set_up_curve()
-        self.assertEqual(test_vecs['P'].φ(), test_vecs['λ']*test_vecs['P'])
+        self.assertEqual(test_vecs['p'].φ(), test_vecs['λ']*test_vecs['p'])
 
     def test_φ(self):
         E, test_vecs = self.set_up_curve()
-        φP = test_vecs['P'].φ()
-        self.assertEqual(φP, test_vecs['φP'])
+        φP = test_vecs['p'].φ()
+        self.assertEqual(φP, test_vecs['φ_p'])
 
     def test_φ_minus_one(self):
         E, test_vecs = self.set_up_curve()
-        φ_minus_one_P = test_vecs['P'].φ_minus_one()
-        self.assertEqual(φ_minus_one_P, test_vecs['φ_minus_one_P'])
+        φ_minus_one_p = test_vecs['p'].φ_minus_one()
+        self.assertEqual(φ_minus_one_p, test_vecs['φ_minus_one_p'])
 
     def test_add(self):
         E, test_vecs = self.set_up_curve()
-        Q = test_vecs['Q']
-        PmQ = test_vecs['PmQ']
-        PpQ = test_vecs['P'].add(Q, PmQ)
-        self.assertEqual(PpQ, test_vecs['PpQ'])
+        Q = test_vecs['q']
+        PmQ = test_vecs['p_minus_q']
+        PpQ = test_vecs['p'].add(Q, PmQ)
+        self.assertEqual(PpQ, test_vecs['p_plus_q'])
 
     def test_dbl(self):
         E, test_vecs = self.set_up_curve()
-        Pdbl = test_vecs['P'].dbl()
-        self.assertEqual(Pdbl, test_vecs['Pdbl'])
+        Pdbl = test_vecs['p'].dbl()
+        self.assertEqual(Pdbl, test_vecs['p_double'])
 
     def test_scalar_mul(self):
         E, test_vecs = self.set_up_curve()
         k = test_vecs['k']
-        kP = test_vecs['P'].naive_mul(k)
-        self.assertEqual(kP, test_vecs['kP'])
+        kP = test_vecs['p'].naive_mul(k)
+        self.assertEqual(kP, test_vecs['k_times_p'])
 
         k1 = test_vecs['k1']
-        k1P = test_vecs['P'].naive_mul(k1)
-        self.assertEqual(k1P, test_vecs['k1P'])
+        k1P = test_vecs['p'].naive_mul(k1)
+        self.assertEqual(k1P, test_vecs['k1_times_p'])
 
         k2 = test_vecs['k2']
-        k2P = test_vecs['P'].naive_mul(k2)
-        self.assertEqual(k2P, test_vecs['k2P'])
+        k2P = test_vecs['p'].naive_mul(k2)
+        self.assertEqual(k2P, test_vecs['k2_times_p'])
 
     def test_multi_scalar_mul(self):
         E, test_vecs = self.set_up_curve()
         F = E.field
-        Q = test_vecs['Q']
-        PmQ = test_vecs['PmQ']
+        Q = test_vecs['q']
+        PmQ = test_vecs['p_minus_q']
         k1 = test_vecs['k1']
         k2 = test_vecs['k2']
-        k1_p_plus_k2_q = test_vecs['P'].multi_scalar_mul(k1, Q, k2, PmQ)
-        self.assertEqual(k1_p_plus_k2_q, test_vecs['k1Ppk2Q'])
+        k1_p_plus_k2_q = test_vecs['p'].multi_scalar_mul(k1, Q, k2, PmQ)
+        self.assertEqual(
+            k1_p_plus_k2_q, test_vecs['k1_times_p_plus_k2_times_q'])
 
     def test_glv(self):
         E, test_vecs = self.set_up_curve()
         k = test_vecs['k']
-        kP = test_vecs['P'].glv(k)
-        self.assertEqual(kP, test_vecs['kP'])
+        kP = test_vecs['p'].glv(k)
+        self.assertEqual(kP, test_vecs['k_times_p'])
 
     def test_bench(self):
         from time import time
@@ -127,13 +128,13 @@ class TestCurve(unittest.TestCase):
         k = 1199715452959664211345788999754554038123456678896406483911385998427296165917073  # random
 
         t = time()
-        for i in range(200):
-            kP_glv = k*test_vecs['P']  # glv
+        for i in range(50):
+            kP_glv = k*test_vecs['p']  # glv
         time_glv = time() - t
 
         t = time()
-        for i in range(200):
-            kP_naive = test_vecs['P'].naive_mul(k)
+        for i in range(50):
+            kP_naive = test_vecs['p'].naive_mul(k)
         time_naive = time()-t
         print("GLV is {:.0f}% faster than a scalar multiplication.".format(
             time_glv/time_naive*100))
