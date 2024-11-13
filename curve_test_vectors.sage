@@ -63,6 +63,13 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
+print("F = Field(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)")
+print("a = F(0x4247698f4e32ad45a293959b4ca17afa4a2d2317e4c6ce5023e1fd63d1b5de98)")
+print("b = F(5)")
+print("r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1")
+print("h = 4")
+print("E = Curve(a, b, r, h)")
+print("test_vectors = {}")
 test_vector_point(p, 'p')
 test_vector_point(q, 'q')
 test_vector_point(2*p, 'p_double')

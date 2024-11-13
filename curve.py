@@ -98,7 +98,7 @@ class Curve:
             return self.curve(x_r, z_r)
 
         def add(self, q, p_minus_q):
-            """Addition algorithm.
+            """Differential addition algorithm.
 
             Requires p_minus_q.
             Reference:
@@ -238,3 +238,22 @@ class Curve:
 
             """
             return self.glv(k)
+
+        # def slow_add(self, q):
+        #     """Compute the addition `self` ± `q`.
+
+        #     It is not a differential addition, but requires the computation of the y-coordinates with sqrt.
+        #     TODO optimized.
+        #     Reference:
+        #     https://www.iacr.org/archive/eurocrypt2014/84410275/84410275.pdf page 8.
+
+        #     """
+        #     x_p = self.x/self.z
+        #     x_q = q.x/q.z
+        #     a = self.curve.a
+        #     b = self.curve.b
+
+        #     y_p = ((x_p**3 + a*x_p**2 + x_p)/b).sqrt()
+        #     y_q = ((x_q**3 + a*x_q**2 + x_q)/b).sqrt()
+
+        #     return self.curve(b * (x_q * y_p - x_p*y_q)**2 / (x_p*x_q*(x_p-x_q)**2), 1)

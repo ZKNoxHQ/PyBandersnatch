@@ -39,7 +39,7 @@ class Field():
             """Return the equality boolean between `self` and `other`."""
             if isinstance(other, int):
                 return self.value == other % self.field.p
-            elif isinstance(other, self.field.Element) and self.field == other.field:
+            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
                 return self.value == other.value
             raise TypeError("Cannot add elements from different fields.")
 
@@ -47,7 +47,7 @@ class Field():
             """Addition of `self` and `other`."""
             if isinstance(other, int):
                 return self+self.field(other)
-            elif isinstance(other, self.field.Element) and self.field == other.field:
+            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
                 # TODO SOMETIMES DO `% self.field.p`
                 return self.field(self.value + other.value)
             raise TypeError("Cannot add elements from different fields.")
@@ -64,16 +64,20 @@ class Field():
             """Difference of `self` and `other`."""
             if isinstance(other, int):
                 return self-self.field(other)
-            elif isinstance(other, self.field.Element) and self.field == other.field:
+            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
                 # TODO SOMETIMES DO `% self.field.p)`
                 return self.field(self.value - other.value)
             raise TypeError("Cannot subtract elements from different fields.")
+
+        def __rsub__(self, other):
+            """Substraction when `other` is given first (mostly for `int` type)."""
+            return -self+other
 
         def __mul__(self, other):
             """Multiplication of `self` and `other`."""
             if isinstance(other, int):
                 return self*self.field(other)
-            elif isinstance(other, self.field.Element) and self.field == other.field:
+            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
                 return self.field((self.value * other.value) % self.field.p)
             raise TypeError("Cannot multiply elements from different fields.")
 

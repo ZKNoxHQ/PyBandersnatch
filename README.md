@@ -19,7 +19,13 @@ python SOMETHING
 ```
 
 ## Test
-Many test functions are written and can be computed using:
+To generate the test vectors:
+```
+sage field_test_vectors.sage > field_test_vectors.py
+sage curve_test_vectors.sage > curve_test_vectors.py
+```
+
+Tests can be computed using:
 ```
 python -m unittest field_test curve_test -v
 ```

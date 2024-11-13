@@ -19,6 +19,9 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = F({})".format(name, hex(k)))
 
 
+print("p = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001")
+print("F = Field(p)")
+print("test_vectors = {}")
 test_vector_scalar(a, 'a')
 test_vector_scalar(b, 'b')
 test_vector_scalar(a+b, 'a_plus_b')
