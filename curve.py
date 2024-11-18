@@ -203,13 +203,13 @@ class Curve:
             """
             s0, s1, p0, p1, pm = k1, k2, self, other, other_minus_self
 
-            # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
             # TODO is it constant-time ? is swapping constant time really important?
-            while s0 < 0:
-                s0 += self.curve.r
-            while s1 < 0:
-                s1 += self.curve.r
-            # THIS IS CLEARLY INEFFICIENT!
+            if s0 < 0:
+                s0 = -s0
+                pm = p0.add(p1, pm)
+            if s1 < 0:
+                s1 = -s1
+                pm = p0.add(p1, pm)
 
             if s0 == 0 and s1 == 0:
                 return self.curve(1, 0)
