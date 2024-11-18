@@ -95,7 +95,6 @@ class TestCurve(unittest.TestCase):
     def test_multi_scalar_mul(self):
         """k1*p + k2*q from test vectors"""
         E, test_vectors = self.set_up_curve()
-        F = E.field
         q = test_vectors['q']
         p_minus_q = test_vectors['p_minus_q']
         k1 = test_vectors['k1']
@@ -120,6 +119,24 @@ class TestCurve(unittest.TestCase):
             k_times_p_1 = test_vectors['p'].glv(k)
             k_times_p_2 = test_vectors['p'].naive_mul(k)
             self.assertEqual(k_times_p_1, k_times_p_2)
+
+    def test_scalar_mul_edge_case(self):
+        """α*p for {α, α-r} small"""
+        E, test_vectors = self.set_up_curve()
+        self.assertEqual(-2*test_vectors['p'], test_vectors['p_double'])
+        self.assertEqual(-1*test_vectors['p'], test_vectors['p'])
+        self.assertEqual(0*test_vectors['p'], E(1, 0))
+        self.assertEqual(1*test_vectors['p'], test_vectors['p'])
+        self.assertEqual(2*test_vectors['p'], test_vectors['p_double'])
+        for i in range(10):
+            self.assertEqual(
+                ((1 << 256)-i)*test_vectors['p'], (2**256-i-E.r) * test_vectors['p'])
+            self.assertEqual((E.r+i)*test_vectors['p'], i*test_vectors['p'])
+
+    def test_scalar_mul_negation(self):
+        """k*p and -k*p"""
+        E, test_vectors = self.set_up_curve()
+        self.assertEqual(-12345*test_vectors['p'], 12345*test_vectors['p'])
 
     # def test_bench(self):
     #     from time import time
@@ -168,7 +185,6 @@ class TestCurve(unittest.TestCase):
     def test_constant_time_multi_scalar_mul(self):
         """k1*p + k2*q from test vectors using constant time"""
         E, test_vectors = self.set_up_curve()
-        F = E.field
         q = test_vectors['q']
         p_minus_q = test_vectors['p_minus_q']
         k1 = test_vectors['k1']
