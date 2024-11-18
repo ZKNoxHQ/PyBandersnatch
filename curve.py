@@ -209,6 +209,10 @@ class Curve:
                 s0 += self.curve.r
             while s1 < 0:
                 s1 += self.curve.r
+            # THIS IS CLEARLY INEFFICIENT!
+
+            if s0 == 0 and s1 == 0:
+                return self.curve(1, 0)
 
             while s0 != 0:
                 if s1 < s0:
@@ -265,9 +269,10 @@ class Curve:
                 39953720565912266872856944794434720047230584117801669040511822283402326025498)
             return self.curve(α * self.x * (self.x + self.z * β)**2, self.z * (self.x + γ * self.z)**2)
 
-        def glv(self, k):
+        def glv(self, k, constant_time=False):
             """GLV scalar multiplication `k`*`self`.
 
+            A constant time option is available.
             Reference:
             https://www.iacr.org/archive/crypto2001/21390189.pdf
             More information in the file `φ.sage`.
@@ -285,15 +290,17 @@ class Curve:
                  round(mpq(k*N1[1], self.curve.r))]
             k1 = k-b[0] * M1[0] - b[1] * M2[0]
             k2 = -b[0] * M1[1] - b[1] * M2[1]
-            return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one())
+            print("k1={}".format(k1))
+            print("k2={}".format(k2))
+            return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one(), constant_time=constant_time)
 
-        def __rmul__(self, k):
+        def __rmul__(self, k, constant_time=False):
             """Scalar multiplication with the scalar give first.
 
             Computed using GLV.
 
             """
-            return self.glv(k)
+            return self.glv(k, constant_time=constant_time)
 
         # def slow_add(self, q):
         #     """Compute the addition `self` ± `q`.
