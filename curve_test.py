@@ -148,6 +148,13 @@ class TestCurve(unittest.TestCase):
     #     r = p.slow_add(q)
     #     self.assertEqual(r, test_vectors["p_plus_q"])
 
+    def test_mul_rfc_7748(self):
+        E, test_vectors = self.set_up_curve()
+        k = 13  # test_vectors['k']
+        k_times_p = test_vectors['p'].mul_rfc_7748(k)
+        k_times_p_naive = test_vectors['p'].naive_mul(k)
+        self.assertEqual(k_times_p, k_times_p_naive)
+
 
 if __name__ == '__main__':
     unittest.main()

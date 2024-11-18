@@ -45,10 +45,9 @@ class Field():
 
         def __add__(self, other):
             """Addition of `self` and `other`."""
-            if isinstance(other, int):
-                return self+self.field(other)
-            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
-                # TODO SOMETIMES DO `% self.field.p`
+            other = self.field(other) if isinstance(
+                other, int) or isinstance(other, mpz) else other
+            if self.field.p == other.field.p:
                 return self.field(self.value + other.value)
             raise TypeError("Cannot add elements from different fields.")
 
@@ -62,10 +61,9 @@ class Field():
 
         def __sub__(self, other):
             """Difference of `self` and `other`."""
-            if isinstance(other, int):
-                return self-self.field(other)
-            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
-                # TODO SOMETIMES DO `% self.field.p)`
+            other = self.field(other) if isinstance(
+                other, int) or isinstance(other, mpz) else other
+            if self.field.p == other.field.p:
                 return self.field(self.value - other.value)
             raise TypeError("Cannot subtract elements from different fields.")
 
@@ -75,9 +73,9 @@ class Field():
 
         def __mul__(self, other):
             """Multiplication of `self` and `other`."""
-            if isinstance(other, int):
-                return self*self.field(other)
-            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
+            other = self.field(other) if isinstance(
+                other, int) or isinstance(other, mpz) else other
+            if self.field.p == other.field.p:
                 return self.field((self.value * other.value) % self.field.p)
             raise TypeError("Cannot multiply elements from different fields.")
 

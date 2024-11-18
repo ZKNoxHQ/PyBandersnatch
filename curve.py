@@ -1,6 +1,17 @@
 # -*- coding: utf-8 -*-
 from field import Field
-from gmpy2 import mpq
+from gmpy2 import mpq, mpz
+
+
+def constant_time_swap(swap_flag, a, b):
+    """Constant time swap function."""
+    swap_flag = int(bool(swap_flag))
+    # TODO check if this mask is okay
+    mask = - swap_flag
+
+    a_new = (a & ~mask) | (b & mask)
+    b_new = (b & ~mask) | (a & mask)
+    return a_new, b_new
 
 
 class Curve:
@@ -19,6 +30,10 @@ class Curve:
     __str__ = __repr__
 
     def __call__(self, x, z):
+        if isinstance(x, int) or isinstance(x, mpz):
+            x = self.field(x)
+        if isinstance(z, int) or isinstance(z, mpz):
+            z = self.field(z)
         return self.Point(x, z, self)
 
     def random(self):
@@ -26,7 +41,7 @@ class Curve:
         x = self.field.random()
         while not (((x**3 + self.a*x**2 + x) / self.b).is_square()):
             x = self.field.random()
-        return self.Point(x, 1, self)
+        return self.Point(x, self.field(1), self)
 
     def j_inv(self):
         """Returns the j-invariant of `self`.
@@ -146,6 +161,39 @@ class Curve:
                 return self.curve(1, 0)
             return r0
 
+        def constant_time_point_swap(self, other, swap_flag):
+            p_1, p_2 = self, other
+            p_1_x, p_2_x = constant_time_swap(
+                swap_flag, p_1.x.value, p_2.x.value)
+            p_1_z, p_2_z = constant_time_swap(
+                swap_flag, p_1.z.value, p_2.z.value)
+            return self.curve(p_1_x, p_1_z), self.curve(p_2_x, p_2_z)
+
+        def mul_rfc_7748(self, k):
+            """Scalar multiplication `k` * `self` following RFC 7748.
+
+            Reference:
+            https://datatracker.ietf.org/doc/html/rfc7748
+            """
+            if k == 0:
+                return self.curve(1, 0)
+            k = abs(k)  # computation modulo {±1}
+            r0 = self
+            r1 = r0.dbl()
+            i = 0
+            r1_minus_r0 = r0
+            k_bits = [int(bit) for bit in bin(k)[2:]]
+            swap = 0
+            for i in range(1, len(k_bits)):
+                swap ^= k_bits[i]
+                r0, r1 = r0.constant_time_point_swap(r1, swap)
+                r0, r1 = r0.dbl(), r0.add(r1, r1_minus_r0)
+            # TODO is it `not(swap)`` or `swap`? Papers say `swap`` but here it works with `not(swap)`
+            r0, r1 = r0.constant_time_point_swap(r1, not (swap))
+            if r0.z == 0:
+                return self.curve(1, 0)
+            return r0
+
         def multi_scalar_mul(self, k1, other, k2, other_minus_self):
             """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
 
@@ -156,6 +204,7 @@ class Curve:
             s0, s1, p0, p1, pm = k1, k2, self, other, other_minus_self
 
             # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
+            # TODO is it constant-time ? it seems that yes because for each bit we have one `dbl` and one `add`, but swapping etc may be dangerous?
             while s0 < 0:
                 s0 += self.curve.r
             while s1 < 0:
