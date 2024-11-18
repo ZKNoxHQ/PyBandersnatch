@@ -112,6 +112,15 @@ class TestCurve(unittest.TestCase):
         k_times_p = test_vectors['p'].glv(k)
         self.assertEqual(k_times_p, test_vectors['k_times_p'])
 
+    def test_scalar_mul_random(self):
+        """k1*p + k2*q from random k1,k2"""
+        E, test_vectors = self.set_up_curve()
+        for i in range(30):
+            k = randint(1, 1 << 254)
+            k_times_p_1 = test_vectors['p'].glv(k)
+            k_times_p_2 = test_vectors['p'].naive_mul(k)
+            self.assertEqual(k_times_p_1, k_times_p_2)
+
     # def test_bench(self):
     #     from time import time
     #     E, test_vectors = self.set_up_curve()

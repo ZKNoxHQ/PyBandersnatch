@@ -1,5 +1,5 @@
 # Bxndxrsnxtch
-An x-only implementation of Bandersnatch.
+A constant time x-only implementation of Bandersnatch elliptic curve.
 
 ## Context
 [Bandersnatch](https://eprint.iacr.org/2021/1152.pdf) is an elliptic curve designed for zero-knowledge proof computations.
