@@ -14,6 +14,26 @@ def constant_time_swap(swap_flag, a, b):
     return a_new, b_new
 
 
+def constant_time_step(flag_1, flag_2, a, b, p, q, r):
+    # TODO this is not constant time in terms of swaps
+    s0 = a
+    s1 = b
+    p0 = p
+    p1 = q
+    pm = r
+    if s0 % 2 == s1 % 2:
+        s0, s1 = s0, (s1 - s0) >> 1
+        p0, p1, pm = p1.add(p0, pm), p1.dbl(), pm
+    elif s1 % 2 == 0:
+        s0, s1 = s0, s1 >> 1
+        p0, p1, pm = p0, p1.dbl(), p1.add(pm, p0)
+    else:
+        s0, s1 = s0 >> 1, s1
+        p0, p1, pm = p0.dbl(),  p1, p0.add(pm, p1)
+
+    return s0, s1, p0, p1, pm
+
+
 class Curve:
     def __init__(self, a, b, r, h):
         self.field = a.field
@@ -149,6 +169,10 @@ class Curve:
             k = abs(k)  # computation modulo {±1}
             r0 = self
             r1 = r0.dbl()
+            if k == 1:
+                return r0
+            if k == 2:
+                return r1
             i = 0
             r1_minus_r0 = r0
             k_bits = [int(bit) for bit in bin(k)[2:]]
@@ -204,7 +228,7 @@ class Curve:
             s0, s1, p0, p1, pm = k1, k2, self, other, other_minus_self
 
             # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
-            # TODO is it constant-time ? it seems that yes because for each bit we have one `dbl` and one `add`, but swapping etc may be dangerous?
+            # TODO is it constant-time ? is swapping constant time really important?
             while s0 < 0:
                 s0 += self.curve.r
             while s1 < 0:
@@ -212,19 +236,48 @@ class Curve:
 
             while s0 != 0:
                 if s1 < s0:
-                    s0, s1, p0, p1, pm, = s1,    s0,         p1,            p0,       pm
+                    s0, s1, p0, p1, pm, = s1, s0,  p1,  p0, pm
                 if s1 <= 4*s0:
-                    s0, s1, p0, p1, pm, = s0,    s1 - \
-                        s0,      p1.add(p0, pm), p1,       p0
+                    s0, s1, p0, p1, pm, = s0, s1 - s0,  p1.add(p0, pm), p1, p0
                 elif s0 % 2 == s1 % 2:
-                    s0, s1, p0, p1, pm, = s0,    (s1 -
-                                                  s0) >> 1, p1.add(p0, pm), p1.dbl(), pm
+                    s0, s1, p0, p1, pm, = s0, (s1 -
+                                               s0) >> 1, p0.add(p1, pm), p1.dbl(), pm
                 elif s1 % 2 == 0:
-                    s0, s1, p0, p1, pm, = s0,    s1 >> 1,      p0,            p1.dbl(), p1.add(pm, p0)
+                    s0, s1, p0, p1, pm, = s0, s1 >> 1,  p0,  p1.dbl(), p1.add(pm, p0)
                 else:
-                    s0, s1, p0, p1, pm, = s0 >> 1, s1,         p0.dbl(),      p1,       p0.add(pm, p1)
+                    s0, s1, p0, p1, pm, = s0 >> 1, s1,  p0.dbl(), p1, p0.add(pm, p1)
             while s1 % 2 == 0:
-                s1, p1 = s1 >> 2, p1.dbl()
+                s1, p1 = s1 >> 1, p1.dbl()
+            if s1 > 1:
+                p1 = p1.naive_mul(s1)
+            return p1
+
+        def constant_time_multi_scalar_mul(self, k1, other, k2, other_minus_self):
+            """Constant time multi scalar multiplication `k1` * `self` + `k2` * `other`.
+
+            Reference:
+            https://eprint.iacr.org/2017/212.pdf Algorithm 9.
+            Adapted to be constant time
+
+            """
+            s0, s1, p0, p1, pm = k1, k2, self, other, other_minus_self
+
+            # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
+            while s0 < 0:
+                s0 += self.curve.r
+            while s1 < 0:
+                s1 += self.curve.r
+
+            while s0 != 0:
+                if s1 < s0:
+                    s0, s1, p0, p1, pm, = s1, s0, p1, p0, pm
+                if s1 <= 4*s0:
+                    s0, s1, p0, p1, pm, = s0, s1 - s0,  p1.add(p0, pm), p1, p0
+                else:
+                    s0, s1, p0, p1, pm = constant_time_step(
+                        (s0 % 2 == s1 % 2), (s1 % 2 == 0), s0, s1, p0, p1, pm)
+            while s1 % 2 == 0:
+                s1, p1 = s1 >> 1, p1.dbl()
             if s1 > 1:
                 p1 = p1.naive_mul(s1)
             return p1
@@ -267,6 +320,8 @@ class Curve:
             More information in the file `φ.sage`.
 
             """
+            if k == 0:
+                return self.curve(1, 0)
             M1 = [113482231691339203864511368254957623327,
                   10741319382058138887739339959866629956]
             M2 = [21482638764116277775478679919733259912, -
@@ -277,7 +332,6 @@ class Curve:
                  round(mpq(k*N1[1], self.curve.r))]
             k1 = k-b[0] * M1[0] - b[1] * M2[0]
             k2 = -b[0] * M1[1] - b[1] * M2[1]
-
             return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one())
 
         def __rmul__(self, k):

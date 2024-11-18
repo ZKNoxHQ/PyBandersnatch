@@ -3,6 +3,7 @@ import unittest
 from field import Field
 from curve import Curve
 import sys
+from random import randint
 
 
 class TestCurve(unittest.TestCase):
@@ -154,6 +155,23 @@ class TestCurve(unittest.TestCase):
         k_times_p = test_vectors['p'].mul_rfc_7748(k)
         k_times_p_naive = test_vectors['p'].naive_mul(k)
         self.assertEqual(k_times_p, k_times_p_naive)
+
+    def test_constant_time_multi_scalar_mul(self):
+        """k1*p + k2*q from test vectors using constant time"""
+        E, test_vectors = self.set_up_curve()
+        F = E.field
+        q = test_vectors['q']
+        p_minus_q = test_vectors['p_minus_q']
+        # k1 = randint(1, 20)  # test_vectors['k1']
+        # k2 = randint(1, 20)  # test_vectors['k2']
+        # print("k=={}, k2={}".format(k1, k2))
+        k1, k2 = 20, 1
+        k1_p_plus_k2_q_1 = test_vectors['p'].multi_scalar_mul(
+            k1, q, k2, p_minus_q)
+        k1_p_plus_k2_q_2 = test_vectors['p'].constant_time_multi_scalar_mul(
+            k1, q, k2, p_minus_q)
+        self.assertEqual(
+            k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
 
 
 if __name__ == '__main__':
