@@ -290,8 +290,6 @@ class Curve:
                  round(mpq(k*N1[1], self.curve.r))]
             k1 = k-b[0] * M1[0] - b[1] * M2[0]
             k2 = -b[0] * M1[1] - b[1] * M2[1]
-            print("k1={}".format(k1))
-            print("k2={}".format(k2))
             return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one(), constant_time=constant_time)
 
         def __rmul__(self, k, constant_time=False):
