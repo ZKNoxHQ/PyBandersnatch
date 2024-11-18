@@ -14,26 +14,6 @@ def constant_time_swap(swap_flag, a, b):
     return a_new, b_new
 
 
-def constant_time_step(flag_1, flag_2, a, b, p, q, r):
-    # TODO this is not constant time in terms of swaps
-    s0 = a
-    s1 = b
-    p0 = p
-    p1 = q
-    pm = r
-    if s0 % 2 == s1 % 2:
-        s0, s1 = s0, (s1 - s0) >> 1
-        p0, p1, pm = p1.add(p0, pm), p1.dbl(), pm
-    elif s1 % 2 == 0:
-        s0, s1 = s0, s1 >> 1
-        p0, p1, pm = p0, p1.dbl(), p1.add(pm, p0)
-    else:
-        s0, s1 = s0 >> 1, s1
-        p0, p1, pm = p0.dbl(),  p1, p0.add(pm, p1)
-
-    return s0, s1, p0, p1, pm
-
-
 class Curve:
     def __init__(self, a, b, r, h):
         self.field = a.field
@@ -169,10 +149,6 @@ class Curve:
             k = abs(k)  # computation modulo {±1}
             r0 = self
             r1 = r0.dbl()
-            if k == 1:
-                return r0
-            if k == 2:
-                return r1
             i = 0
             r1_minus_r0 = r0
             k_bits = [int(bit) for bit in bin(k)[2:]]
@@ -218,7 +194,7 @@ class Curve:
                 return self.curve(1, 0)
             return r0
 
-        def multi_scalar_mul(self, k1, other, k2, other_minus_self):
+        def multi_scalar_mul(self, k1, other, k2, other_minus_self, constant_time=False):
             """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
 
             Reference:
@@ -236,8 +212,13 @@ class Curve:
 
             while s0 != 0:
                 if s1 < s0:
+                    if constant_time:
+                        _ = p0.dbl()
+                        _ = p0.add(p1, pm)
                     s0, s1, p0, p1, pm, = s1, s0,  p1,  p0, pm
                 if s1 <= 4*s0:
+                    if constant_time:
+                        _ = p0.dbl()
                     s0, s1, p0, p1, pm, = s0, s1 - s0,  p1.add(p0, pm), p1, p0
                 elif s0 % 2 == s1 % 2:
                     s0, s1, p0, p1, pm, = s0, (s1 -
@@ -247,36 +228,8 @@ class Curve:
                 else:
                     s0, s1, p0, p1, pm, = s0 >> 1, s1,  p0.dbl(), p1, p0.add(pm, p1)
             while s1 % 2 == 0:
-                s1, p1 = s1 >> 1, p1.dbl()
-            if s1 > 1:
-                p1 = p1.naive_mul(s1)
-            return p1
-
-        def constant_time_multi_scalar_mul(self, k1, other, k2, other_minus_self):
-            """Constant time multi scalar multiplication `k1` * `self` + `k2` * `other`.
-
-            Reference:
-            https://eprint.iacr.org/2017/212.pdf Algorithm 9.
-            Adapted to be constant time
-
-            """
-            s0, s1, p0, p1, pm = k1, k2, self, other, other_minus_self
-
-            # TODO can be done faster as we look at points up to a sign, but the condition `if s1<s0` then needs to be considered differently
-            while s0 < 0:
-                s0 += self.curve.r
-            while s1 < 0:
-                s1 += self.curve.r
-
-            while s0 != 0:
-                if s1 < s0:
-                    s0, s1, p0, p1, pm, = s1, s0, p1, p0, pm
-                if s1 <= 4*s0:
-                    s0, s1, p0, p1, pm, = s0, s1 - s0,  p1.add(p0, pm), p1, p0
-                else:
-                    s0, s1, p0, p1, pm = constant_time_step(
-                        (s0 % 2 == s1 % 2), (s1 % 2 == 0), s0, s1, p0, p1, pm)
-            while s1 % 2 == 0:
+                if constant_time:
+                    _ = p0.dbl()
                 s1, p1 = s1 >> 1, p1.dbl()
             if s1 > 1:
                 p1 = p1.naive_mul(s1)

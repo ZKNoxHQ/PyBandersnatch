@@ -162,14 +162,12 @@ class TestCurve(unittest.TestCase):
         F = E.field
         q = test_vectors['q']
         p_minus_q = test_vectors['p_minus_q']
-        # k1 = randint(1, 20)  # test_vectors['k1']
-        # k2 = randint(1, 20)  # test_vectors['k2']
-        # print("k=={}, k2={}".format(k1, k2))
-        k1, k2 = 20, 1
+        k1 = test_vectors['k1']
+        k2 = test_vectors['k2']
         k1_p_plus_k2_q_1 = test_vectors['p'].multi_scalar_mul(
-            k1, q, k2, p_minus_q)
-        k1_p_plus_k2_q_2 = test_vectors['p'].constant_time_multi_scalar_mul(
-            k1, q, k2, p_minus_q)
+            k1, q, k2, p_minus_q, True)
+        k1_p_plus_k2_q_2 = test_vectors['p'].multi_scalar_mul(
+            k1, q, k2, p_minus_q, False)
         self.assertEqual(
             k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
 
