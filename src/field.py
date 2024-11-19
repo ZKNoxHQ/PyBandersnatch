@@ -10,7 +10,7 @@ class Field():
 
         # 2-adicity
         self.two_adicity = 0
-        while (p-1) % 2**self.two_adicity == 0:
+        while mod(p-1, 1 << self.two_adicity) == 0:
             self.two_adicity += 1
         self.two_adicity -= 1
 
@@ -32,24 +32,23 @@ class Field():
 
     class Element:
         def __init__(self, value, field):
-            self.value = value % field.p
+            if value < field.p and value >= 0:
+                self.value = value
+            else:
+                self.value = mod(value, field.p)
             self.field = field
 
         def __eq__(self, other):
             """Return the equality boolean between `self` and `other`."""
             if isinstance(other, int):
-                return self.value == other % self.field.p
-            elif isinstance(other, self.field.Element) and self.field.p == other.field.p:
-                return self.value == other.value
-            raise TypeError("Cannot add elements from different fields.")
+                return self.value == mod(other, self.field.p)
+            return self.value == other.value
 
         def __add__(self, other):
             """Addition of `self` and `other`."""
-            other = self.field(other) if isinstance(
-                other, int) or isinstance(other, mpz) else other
-            if self.field.p == other.field.p:
-                return self.field(self.value + other.value)
-            raise TypeError("Cannot add elements from different fields.")
+            if isinstance(other, int):
+                other = self.field(other)
+            return self.field(self.value + other.value)
 
         def __radd__(self, other):
             """Addition when `other` is given first (mostly for `int` type)."""
@@ -57,15 +56,13 @@ class Field():
 
         def __neg__(self):
             """Negation of `self`."""
-            return self.field(-self.value % self.field.p)
+            return self.field(-self.value)
 
         def __sub__(self, other):
             """Difference of `self` and `other`."""
-            other = self.field(other) if isinstance(
-                other, int) or isinstance(other, mpz) else other
-            if self.field.p == other.field.p:
-                return self.field(self.value - other.value)
-            raise TypeError("Cannot subtract elements from different fields.")
+            if isinstance(other, int):
+                other = self.field(other)
+            return self.field(self.value - other.value)
 
         def __rsub__(self, other):
             """Substraction when `other` is given first (mostly for `int` type)."""
@@ -73,11 +70,9 @@ class Field():
 
         def __mul__(self, other):
             """Multiplication of `self` and `other`."""
-            other = self.field(other) if isinstance(
-                other, int) or isinstance(other, mpz) else other
-            if self.field.p == other.field.p:
-                return self.field((self.value * other.value) % self.field.p)
-            raise TypeError("Cannot multiply elements from different fields.")
+            if isinstance(other, int) or isinstance(other, mpz):
+                other = self.field(other)
+            return self.field(self.value * other.value)
 
         def __rmul__(self, other):
             """Multiplication when `other` is given first (mostly for `int` type)."""
@@ -98,13 +93,13 @@ class Field():
 
         def __truediv__(self, other):
             """Division of `self` by `other` modulo `self.field.p`."""
-            if isinstance(other, int):
-                return self/self.field(other)
-            if isinstance(other, self.field.Element) and self.field == other.field:
-                inverse_other = invert(other.value, self.field.p)
-                return self.field((self.value * inverse_other) % self.field.p)
-            # TODO division by zero error?
-            raise TypeError("Cannot divide elements from different fields.")
+            if isinstance(other, int) or isinstance(other, mpz):
+                other = self.field(other)
+            if other == 0:
+                raise TypeError(
+                    "0 is not invertible.")
+            inverse_other = invert(other.value, self.field.p)
+            return self.field(self.value * inverse_other)
 
         def __repr__(self):
             return f"{self.value}"
@@ -123,7 +118,7 @@ class Field():
             if self.value == 0:
                 return self
 
-            if self.field.p % 4 == 3:
+            if mod(self.field.p, 4) == 3:
                 # TODO ASSERT IS SQUARE BEFORE RETURN
                 return powmod(self.value, (self.field.p+1)//4, self.field.p)
 

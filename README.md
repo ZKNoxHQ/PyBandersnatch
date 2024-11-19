@@ -15,11 +15,14 @@ sage src/tests/field_test_vectors.sage > src/tests/field_test_vectors.py
 sage src/tests/curve_test_vectors.sage > src/tests/curve_test_vectors.py
 ```
 
-Tests for `Field` and `Curve`can be computed using:
+Tests for `Field`, `Curve` and `KeyExchange` can be computed using:
 ```
 python src/main.py --test
 ```
-Benchmarks for GLV vs scalar multiplication can be computed using:
+
+## Benchmarks
+We provide some benchmark for `Field` arithmetic, as well as a comparison between GLV and a normal scalar multiplication using double-and-add.
+The benchmarks can be computed using:
 ```
 python src/main.py --bench
 ```

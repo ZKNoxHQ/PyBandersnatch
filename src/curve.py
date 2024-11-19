@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import argparse
 from field import Field
-from gmpy2 import mpq, mpz
+from gmpy2 import mpq, mpz, mod
 
 
 def constant_time_swap(swap_flag, a, b):
@@ -225,14 +225,14 @@ class Curve:
                     if constant_time:
                         _ = p0.dbl()
                     s0, s1, p0, p1, pm, = s0, s1 - s0,  p1.add(p0, pm), p1, p0
-                elif s0 % 2 == s1 % 2:
+                elif mod(s0-s1, 2) == 0:
                     s0, s1, p0, p1, pm, = s0, (s1 -
                                                s0) >> 1, p0.add(p1, pm), p1.dbl(), pm
-                elif s1 % 2 == 0:
+                elif mod(s1, 2) == 0:
                     s0, s1, p0, p1, pm, = s0, s1 >> 1,  p0,  p1.dbl(), p1.add(pm, p0)
                 else:
                     s0, s1, p0, p1, pm, = s0 >> 1, s1,  p0.dbl(), p1, p0.add(pm, p1)
-            while s1 % 2 == 0:
+            while mod(s1, 2) == 0:
                 if constant_time:
                     _ = p0.dbl()
                 s1, p1 = s1 >> 1, p1.dbl()
