@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import argparse
 
-from curve_bench import BenchCurve
-from curve_test import TestCurve
-from field_test import TestField
+from bench.curve_bench import BenchCurve
+from tests.curve_test import TestCurve
+from tests.field_test import TestField
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ class TestCurve(unittest.TestCase):
 
         """
         try:
-            with open("curve_test_vectors.py", "r") as file:
+            with open("src/tests/curve_test_vectors.py", "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(

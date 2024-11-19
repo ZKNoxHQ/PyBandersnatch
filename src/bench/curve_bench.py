@@ -14,7 +14,7 @@ class BenchCurve:
         Test vectors generated using the file `curve_test_vectors.sage`.
 
         """
-        with open("curve_test_vectors.py", "r") as file:
+        with open("src/tests/curve_test_vectors.py", "r") as file:
             exec(file.read(), globals())
         return E, test_vectors  # type: ignore
 
@@ -30,8 +30,8 @@ class BenchCurve:
         glv_time = timeit("test_vectors['k']*test_vectors['p']",
                           globals=globals(), number=n_iter)
 
-        print(f"Naive mul:{naive_mul_time/n_iter*10**6:.0f} μs ; GLV: {glv_time /
-              n_iter*10**6:.0f} μs ({glv_time/naive_mul_time*100:.0f}% faster)")
+        print("Naive mul: {:.0f} μs; GLV: {:.0f} μs ({:.0f}% faster)".format(
+            naive_mul_time/n_iter*10**6, glv_time / n_iter*10**6, glv_time/naive_mul_time*100))
 
     def run_all_bench(self):
         for method_name in dir(self):

@@ -12,7 +12,7 @@ class TestField(unittest.TestCase):
 
         """
         try:
-            with open("field_test_vectors.py", "r") as file:
+            with open("src/tests/field_test_vectors.py", "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(

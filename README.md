@@ -11,15 +11,15 @@ The integer arithmetic is computed using `gmpy2`, a wrapper to the efficient `gm
 ## Test
 To generate the test vectors:
 ```
-sage field_test_vectors.sage > field_test_vectors.py
-sage curve_test_vectors.sage > curve_test_vectors.py
+sage src/tests/field_test_vectors.sage > src/tests/field_test_vectors.py
+sage src/tests/curve_test_vectors.sage > src/tests/curve_test_vectors.py
 ```
 
 Tests for `Field` and `Curve`can be computed using:
 ```
-python main.py --test
+python src/main.py --test
 ```
 Benchmarks for GLV vs scalar multiplication can be computed using:
 ```
-python main.py --bench
+python src/main.py --bench
 ```
