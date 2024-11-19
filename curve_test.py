@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import inspect
 import unittest
 from field import Field
 from curve import Curve
@@ -138,25 +139,6 @@ class TestCurve(unittest.TestCase):
         E, test_vectors = self.set_up_curve()
         self.assertEqual(-12345*test_vectors['p'], 12345*test_vectors['p'])
 
-    # def test_bench(self):
-    #     from time import time
-    #     E, test_vectors = self.set_up_curve()
-    #     # k = test_vectors['k'] # this is curiously improving even better GLV...
-    #     k = 1199715452959664211345788999754554038123456678896406483911385998427296165917073  # random
-
-    #     t = time()
-    #     for i in range(50):
-    #         k_times_p_glv = k*test_vectors['p']  # glv
-    #     time_glv = time() - t
-
-    #     t = time()
-    #     for i in range(50):
-    #         k_times_p_naive = test_vectors['p'].naive_mul(k)
-    #     time_naive = time()-t
-    #     print("GLV is {:.0f}% faster than a scalar multiplication.".format(
-    #         time_glv/time_naive*100))
-    #     self.assertEqual(k_times_p_glv, k_times_p_naive)
-
     def test_generator(self):
         """Generation of the small x order r point as in the test vectors"""
         E, test_vectors = self.set_up_curve()
@@ -196,6 +178,14 @@ class TestCurve(unittest.TestCase):
         self.assertEqual(
             k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def run_all_test(self):
+        print("Tests for Curve")
+        print("------")
+        for method_name in dir(self):
+            if method_name.startswith("test_"):
+                method = getattr(self, method_name)
+                if callable(method):
+                    print(f"Running: {method_name}")
+                    method()
+        print("------")
+        print()

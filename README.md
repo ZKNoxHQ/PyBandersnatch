@@ -15,7 +15,11 @@ sage field_test_vectors.sage > field_test_vectors.py
 sage curve_test_vectors.sage > curve_test_vectors.py
 ```
 
-Tests can be computed using:
+Tests for `Field` and `Curve`can be computed using:
 ```
-python -m unittest field_test curve_test -v
+python main.py --test
+```
+Benchmarks for GLV vs scalar multiplication can be computed using:
+```
+python main.py --bench
 ```
