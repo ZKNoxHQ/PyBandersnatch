@@ -30,8 +30,8 @@ class BenchCurve:
         glv_time = timeit("test_vectors['k']*test_vectors['p']",
                           globals=globals(), number=n_iter)
 
-        print("Naive mul: {:.0f} μs; GLV: {:.0f} μs ({:.0f}% faster)".format(
-            naive_mul_time/n_iter*10**6, glv_time / n_iter*10**6, glv_time/naive_mul_time*100))
+        print("Naive mul: {:.2f} ms; GLV: {:.2f} ms ({:.0f}% faster)".format(
+            naive_mul_time/n_iter*10**3, glv_time / n_iter*10**3, glv_time/naive_mul_time*100))
 
     def run_all_bench(self):
         for method_name in dir(self):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from gmpy2 import random_state, mpz_random, invert, mpz, powmod, sign, mod
+from gmpy2 import random_state, mpz_random, invert, mpz, powmod, sign, f_mod
 
 
 class Field():
@@ -10,7 +10,7 @@ class Field():
 
         # 2-adicity
         self.two_adicity = 0
-        while mod(p-1, 1 << self.two_adicity) == 0:
+        while f_mod(p-1, 1 << self.two_adicity) == 0:
             self.two_adicity += 1
         self.two_adicity -= 1
 
@@ -32,22 +32,26 @@ class Field():
 
     class Element:
         def __init__(self, value, field):
-            if value < field.p and value >= 0:
+            if 0 <= value < field.p:
                 self.value = value
             else:
-                self.value = mod(value, field.p)
+                self.value = f_mod(value, field.p)
             self.field = field
 
         def __eq__(self, other):
             """Return the equality boolean between `self` and `other`."""
             if isinstance(other, int):
-                return self.value == mod(other, self.field.p)
+                return self.value == f_mod(other, self.field.p)
             return self.value == other.value
+
+        def _convert_to_element(self, other):
+            if isinstance(other, self.__class__):
+                return other
+            return self.field(other)
 
         def __add__(self, other):
             """Addition of `self` and `other`."""
-            if isinstance(other, int):
-                other = self.field(other)
+            other = self._convert_to_element(other)
             return self.field(self.value + other.value)
 
         def __radd__(self, other):
@@ -60,8 +64,7 @@ class Field():
 
         def __sub__(self, other):
             """Difference of `self` and `other`."""
-            if isinstance(other, int):
-                other = self.field(other)
+            other = self._convert_to_element(other)
             return self.field(self.value - other.value)
 
         def __rsub__(self, other):
@@ -70,8 +73,7 @@ class Field():
 
         def __mul__(self, other):
             """Multiplication of `self` and `other`."""
-            if isinstance(other, int) or isinstance(other, mpz):
-                other = self.field(other)
+            other = self._convert_to_element(other)
             return self.field(self.value * other.value)
 
         def __rmul__(self, other):
@@ -93,13 +95,8 @@ class Field():
 
         def __truediv__(self, other):
             """Division of `self` by `other` modulo `self.field.p`."""
-            if isinstance(other, int) or isinstance(other, mpz):
-                other = self.field(other)
-            if other == 0:
-                raise TypeError(
-                    "0 is not invertible.")
-            inverse_other = invert(other.value, self.field.p)
-            return self.field(self.value * inverse_other)
+            other = self._convert_to_element(other)
+            return self.field(self.value * invert(other.value, self.field.p))
 
         def __repr__(self):
             return f"{self.value}"
@@ -118,7 +115,7 @@ class Field():
             if self.value == 0:
                 return self
 
-            if mod(self.field.p, 4) == 3:
+            if f_mod(self.field.p, 4) == 3:
                 # TODO ASSERT IS SQUARE BEFORE RETURN
                 return powmod(self.value, (self.field.p+1)//4, self.field.p)
 

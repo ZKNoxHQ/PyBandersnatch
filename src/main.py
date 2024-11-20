@@ -3,34 +3,47 @@ import argparse
 
 from bench.curve_bench import BenchCurve
 from bench.field_bench import BenchField
+from curve import Curve
+from field import Field
+from key_exchange import KeyExchange
 from tests.curve_test import TestCurve
 from tests.field_test import TestField
 from tests.key_exchange_test import TestKeyExchange
 
 
+def run_specific_function(args, classes):
+    for cls in classes:
+        if hasattr(cls, args.function):
+            func = getattr(cls, args.function)
+            func()
+            return
+    print(f"Function {args.function} not found in any provided classes.")
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description="Run tests or benchmarks for the Curve.")
+        description="Run tests or benchmarks for Bxndxrsnxtch.")
     parser.add_argument('--test', action='store_true',
                         help="Run tests for the curve")
     parser.add_argument('--bench', action='store_true',
                         help="Run benchmarks for the curve")
+    parser.add_argument('--function', type=str,
+                        help='Specify a function to test/bench')
 
     args = parser.parse_args()
 
-    if args.test:
-        test_field = TestField()
-        test_field.run_all_test()
-        test_curve = TestCurve()
-        test_curve.run_all_test()
-        test_key_exchange = TestKeyExchange()
-        test_key_exchange.run_all_test()
+# Classes to consider
+    test_classes = [TestField(), TestCurve(), TestKeyExchange()]
+    bench_classes = [BenchField(), BenchCurve()]
 
-    elif args.bench:
-        bench_field = BenchField()
-        bench_field.run_all_bench()
-        bench_curve = BenchCurve()
-        bench_curve.run_all_bench()
+    if args.function:
+        run_specific_function(args, test_classes + bench_classes)
     else:
-        print("Please specify either --test or --bench.")
+        # Run all tests or benchmarks if no function is specified
+        if args.test:
+            for cls in test_classes:
+                cls.run_all_test()
+        elif args.bench:
+            for cls in bench_classes:
+                cls.run_all_bench()
