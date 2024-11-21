@@ -10,6 +10,7 @@ The integer arithmetic is computed using `gmpy2`, a wrapper to the efficient `gm
 
 ## Montgomery model arithmetic
 We follow Sections 3.2, 3.3 of [this paper](https://eprint.iacr.org/2017/212.pdf) for the $XZ$-only arithmetic of Bandersnatch:
+
 $$\begin{array}{rl}
 X_{[2]P} &= (X_P+ Z_P)²(X_P-Z_P)²,\\
 Z_{[2]P} &= (4X_PZ_P)((X_P-Z_P)² + ((A+2)/4 (4X_PZ_P))
