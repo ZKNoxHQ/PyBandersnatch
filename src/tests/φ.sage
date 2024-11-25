@@ -53,12 +53,23 @@ assert smX**2 * (X**3+A*X**2+X) == rmX**3 + A*rmX**2 + rmX
 x_φ_minus_one = (X*rmX * (2*A + rmX + X) + 2*smX *
                  (X**3+A*X**2+X) + X + rmX) / (X-rmX)**2
 
+(x_φ_minus_one_numerator_1, mul_1), (x_φ_minus_one_numerator_2,
+                                     mul_2) = x_φ_minus_one.numerator().factor()
+(x_φ_minus_one_denominator, mul_3), = x_φ_minus_one.denominator().factor()
+
 # The final x(φ-1) = (αt(t+β)², (t+γ)²)
-α = Fp(13017314467421381532402061398313046228820690393386411611562176812113295071440)
-β = Fp(14989411347484419666605643019079533103863186413725217032868654387860539633484)
-γ = Fp(39953720565912266872856944794434720047230584117801669040511822283402326025498)
+α = x_φ_minus_one.numerator().factor().unit()
+β = x_φ_minus_one_numerator_2.list()[0]
+γ = x_φ_minus_one_denominator.list()[0]
 assert (x_φ_minus_one == α*X*(X+β)**2/(X+γ)**2)
+
 # in projective x-only coordinates: (X,Z) -> (αX(X+Zβ)², Z(X+γZ)²)
+Fpxz = Fp['x', 'z']
+FpXZ = FractionField(Fpxz)
+X, Z = FpXZ.gens()
+x_φ_minus_one_numerator_1_xz = FpXZ(x_φ_minus_one_numerator_1)(x=X/Z)
+x_φ_minus_one_numerator_2_xz = FpXZ(x_φ_minus_one_numerator_2)(x=X/Z)
+x_φ_minus_one_denominator_xz = FpXZ(x_φ_minus_one_denominator)(x=X/Z)
 
 # GLV decomposition
 λ = 8913659658109529928382530854484400854125314752504019737736543920008458395397
