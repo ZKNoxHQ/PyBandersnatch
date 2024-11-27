@@ -101,6 +101,11 @@ y2 = r_num_y[1][0].coefficients()[1]
 α = r_num_y.unit()/r_den_y.unit()
 assert α * x/y * (y-y1) * (y-y2) == r_ed_XY
 
+print("α = {}".format(hex(α)))
+print("y1 = {}".format(hex(y1)))
+print("y2 = {}".format(hex(y2)))
+
+
 s_num_y = s_ed_XY.numerator()(x=1).factor()
 s_den_y = s_ed_XY.denominator()(x=1).factor()
 y3 = s_num_y[0][0].coefficients()[1]
@@ -109,3 +114,9 @@ y5 = s_den_y[0][0].coefficients()[1]
 y6 = s_den_y[1][0].coefficients()[1]
 β = s_num_y.unit()/s_den_y.unit()
 assert β * (y-y3) * (y-y4) / ((y-y5) * (y-y6)) == s_ed_XY
+
+print("β = {}".format(hex(β)))
+print("y3 = {}".format(hex(y3)))
+print("y4 = {}".format(hex(y4)))
+print("y5 = {}".format(hex(y5)))
+print("y6 = {}".format(hex(y6)))
