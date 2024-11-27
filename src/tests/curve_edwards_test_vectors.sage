@@ -17,7 +17,7 @@ assert (E.order() % r == 0)
 a_ed, d_ed = (A+2)/B, (A-2)/B
 
 # generator
-gx = 1
+gx = 6
 while not ((1-a_ed*gx**2)/(1-d_ed*gx**2)).is_square():
     gx = -gx
     if gx > 0:
@@ -48,7 +48,7 @@ q = E(20252373884274151187306374916054971403178400027240398097441693977206289492
 k = 11997154529596648729624281997554038960651754640906483911385998427296165917073
 k1 = -45894336995428141233269187797940484884
 k2 = 8683555061824981937504960049179714114
-λ = 8913659658109529928382530854484400854125314752504019737736543920008458395397
+λ = -8913659658109529928382530854484400854125314752504019737736543920008458395397
 
 u, v = to_ed(p)
 assert a_ed * u**2 + v**2 == 1+d_ed * u**2*v**2
@@ -95,7 +95,7 @@ test_vector_point(q, 'q')
 test_vector_point(2*p, 'p_double')
 test_vector_point(p+q, 'p_plus_q')
 test_vector_point(p-q, 'p_minus_q')
-test_vector_point(φ(p), 'φ_p', False)
+test_vector_point(λ*p, 'φ_p')
 test_vector_point(k*p, 'k_times_p')
 test_vector_point(k1*p, 'k1_times_p')
 test_vector_point(k2*p, 'k2_times_p')
