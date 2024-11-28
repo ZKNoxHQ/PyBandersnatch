@@ -91,7 +91,7 @@ class TestCurveEdwards(unittest.TestCase):
         E, test_vectors = self.set_up_curve()
         p = test_vectors['p']
         minus_p = p.neg()
-        self.assertEqual(p.add(minus_p), E(0, 1, 0))
+        self.assertEqual(p.add(minus_p), E(0, 1, 1))
 
     def test_scalar_mul(self):
         """k*p from test vectors"""
@@ -153,7 +153,7 @@ class TestCurveEdwards(unittest.TestCase):
         E, test_vectors = self.set_up_curve()
         self.assertEqual(-2*test_vectors['p'], test_vectors['p_double'].neg())
         self.assertEqual(-1*test_vectors['p'], test_vectors['p'].neg())
-        self.assertEqual(0*test_vectors['p'], E(0, 1, 0))
+        self.assertEqual(0*test_vectors['p'], E(0, 1, 1))
         self.assertEqual(1*test_vectors['p'], test_vectors['p'])
         self.assertEqual(2*test_vectors['p'], test_vectors['p_double'])
         for i in range(10):
@@ -172,7 +172,7 @@ class TestCurveEdwards(unittest.TestCase):
         E, test_vectors = self.set_up_curve()
         # Small x generator
         x = 0
-        g = E(E.field(0), E.field(1), E.field(0))
+        g = E(E.field(0), E.field(1), E.field(1))
         while not (g.is_prime_order(E.r)):
             x += 1
             while not ((1-E.a*x**2)/(1-E.d*x**2)).is_square():
@@ -180,10 +180,31 @@ class TestCurveEdwards(unittest.TestCase):
                 if x > 0:
                     x += 1
             y = ((1-E.a*x**2)/(1-E.d*x**2)).sqrt()
+            # TODO: what about -y?
             g = E(E.field(x), E.field(y.value), E.field(1))
-            g_2 = E(E.field(x), E.field(-y.value), E.field(1))
         self.assertTrue(g.is_prime_order(E.r))
-        self.assertIn(E.generator, [g, g_2])
+        self.assertEqual(E.generator, g)
+
+    def test_small_x_point(self):
+        """Point with x=1 is not of order r, from the test vectors"""
+        E, test_vectors = self.set_up_curve()
+        small_p = test_vectors['small_p']
+        small_p_dbl = test_vectors['small_p_dbl']
+        self.assertEqual(small_p.dbl(), small_p_dbl)
+        self.assertEqual(small_p.naive_mul(E.r), E(0, -1, 1))
+        self.assertTrue(E.generator.is_prime_order(E.r))
+
+    def test_order_2_points(self):
+        """The point (0,-1,1) is of order 2"""
+        E, test_vectors = self.set_up_curve()
+        p_order_2_1 = test_vectors['p_order_2_1']
+        self.assertTrue(p_order_2_1.is_prime_order(2))
+        # TODO: We cannot manipulate points with z=0 in this implementation.
+        # Hence, this does not work.
+        # p_order_2_2 = test_vectors['p_order_2_2']
+        # self.assertTrue(p_order_2_2.is_prime_order(2))
+        # p_order_2_3 = test_vectors['p_order_2_3']
+        # self.assertTrue(p_order_2_3.is_prime_order(2))
 
     def run_all_test(self):
         print("Tests for Curve")

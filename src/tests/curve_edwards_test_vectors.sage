@@ -16,12 +16,12 @@ assert (E.order() % r == 0)
 # 2017-212, equation (6)
 a_ed, d_ed = (A+2)/B, (A-2)/B
 # Isomorphism to get a=5
-assert (a_ed/5).is_square()
-sqrt_a_ed_5 = (a_ed/5).sqrt()
-a_ed, d_ed = Fp(5), d_ed/a_ed*5
+assert (a_ed/-5).is_square()
+sqrt_a_ed_5 = (a_ed/-5).sqrt()
+a_ed, d_ed = Fp(-5), d_ed/a_ed*-5
 
 # generator
-gx = 1
+gx = 2
 while not ((1-a_ed*gx**2)/(1-d_ed*gx**2)).is_square():
     gx = -gx
     if gx > 0:
@@ -78,13 +78,20 @@ xx, yy, zz = φ(p)
 assert zz == 1 and yy**2 == xx**3 + a*xx + b
 
 
-def test_vector_point(p, name, ws=True):
+def test_vector_point(p, name, ws=True, projective=False):
     if ws:
         [x, y] = to_ed(p)
+        print("test_vectors['{}'] = E(F({}), F({}), F(1))".format(
+            name, hex(x), hex(y)))
     else:
-        [x, y] = p
-    print("test_vectors['{}'] = E(F({}), F({}), F(1))".format(
-        name, hex(x), hex(y)))
+        if projective == False:
+            [x, y] = p
+            print("test_vectors['{}'] = E(F({}), F({}), F(1))".format(
+                name, hex(x), hex(y)))
+        else:
+            [x, y, z] = p
+            print("test_vectors['{}'] = E(F({}), F({}), F({}))".format(
+                name, hex(x), hex(y), hex(z)))
 
 
 def test_vector_scalar(k, name):
@@ -113,3 +120,19 @@ test_vector_scalar(k, 'k')
 test_vector_scalar(k1, 'k1')
 test_vector_scalar(k2, 'k2')
 test_vector_scalar(λ, 'λ')
+
+# small order point
+test_vector_point((0, Fp(-1)), "p_order_2_1", False)
+test_vector_point((0, 1, 0), "p_order_2_2", False, True)
+test_vector_point((1, 0, 0), "p_order_2_3", False, True)
+
+
+# small x point
+xx = Fp(1)
+yy = sqrt((1-a_ed*xx**2)/(1-d_ed*xx**2))
+xx_ws = 29473314690983384253693538305232603171909485083805813020990978841153575434625
+yy_ws = 44104446522130670290417281820901020888519367242619929491530721381946199062276
+small_p_ws = E(xx_ws, yy_ws)
+assert small_p_ws.order() != r
+test_vector_point((xx, yy), "small_p", False)
+test_vector_point(2 * small_p_ws, "small_p_dbl")

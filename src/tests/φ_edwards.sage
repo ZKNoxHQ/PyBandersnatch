@@ -18,9 +18,9 @@ assert (E.order() % r == 0)
 # 2017-212, equation (6)
 a_ed, d_ed = (A+2)/B, (A-2)/B
 # Isomorphism to get a=5
-assert (a_ed/5).is_square()
-sqrt_a_ed_5 = (a_ed/5).sqrt()
-a_ed, d_ed = Fp(5), d_ed / a_ed * 5
+assert (a_ed/-5).is_square()
+sqrt_a_ed_5 = (a_ed/-5).sqrt()
+a_ed, d_ed = Fp(-5), d_ed / a_ed * -5
 
 
 Fpxy = Fp['x', 'y']

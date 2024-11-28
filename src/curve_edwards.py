@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import argparse
+from math import floor
 from field import Field
 from gmpy2 import mpq, mpz, mod
 
@@ -11,9 +12,8 @@ class CurveEdwards:
         self.d = d
         self.r = r
         self.h = h
-        self.a24 = (self.a+2)/4
-        self.generator = self.Point(self.field(1), self.field(
-            0x39c8932646733e6987574d2c518adfb172294f2c8c95981c0c95f8188762dd7a), self.field(1), self)
+        self.generator = self.Point(self.field(3), self.field(
+            0x2d418cc584d9c9df8750a436fac98068949d14c7bdce4034fe792e4c14e30a3f), self.field(1), self)
 
     def __repr__(self):
         return "Edwards curve defined by {}*x^2 + y^2 = 1 + {} * x^2*y^2".format(self.a, self.d)
@@ -63,12 +63,33 @@ class CurveEdwards:
 
             Points are represented in projective coordinates.
             """
-            return self.z == 0 or other.z == 0 or (self.x * other.z == other.x * self.z and self.y * other.z == other.y * self.z)
+            if self.z != 0 and other.z != 0:
+                return (self.x * other.z == other.x * self.z and self.y * other.z == other.y * self.z)
+            else:
+                if self.z == 0 and other.z == 0:
+                    # self and other are both at infinity
+                    if self.x == 0 and other.x == 0:
+                        # (0,a,0) == (0,b,0)
+                        return True
+                    elif self.y == 0 and other.y == 0:
+                        # (a,0,0) == (b,0,0)
+                        return True
+                    else:
+                        # (a,0,0) ≠ (0,b,0)
+                        return False
+                    return self.x
+                else:
+                    # only one of the two points is at infinity
+                    return False
 
         def normalize(self):
             """Affine representation of the projective point."""
             if self.z == 0:
-                return self.curve(0, 1, 0)
+                if self.x == 0:
+                    return self.curve(0, 1, 0)
+                elif self.y == 0:
+                    return self.curve(1, 0, 0)
+                raise ("This should not happen")
             return self.curve(self.x/self.z, self.y/self.z, 1)
 
         def neg(self):
@@ -77,7 +98,7 @@ class CurveEdwards:
         def in_curve(self):
             """Returns the curve membership boolean."""
             if self.z == 0:
-                return True
+                return self.x*self.y == 0
             x = self.x/self.z
             a = self.curve.a
             d = self.curve.d
@@ -90,8 +111,10 @@ class CurveEdwards:
             https://eprint.iacr.org/2008/013.pdf page 12.
 
             """
-            if self.z == 0:
-                return self.curve(0, 1, 0)
+            if self.z == 0 and self.x * self.y == 0:  # (1,0,0) and (0,1,0) are of order 2
+                return self.curve(0, 1, 1)
+            if self == self.curve(0, 1, 1):
+                return self
             x = self.x
             y = self.y
             z = self.z
@@ -114,9 +137,9 @@ class CurveEdwards:
             https://eprint.iacr.org/2008/013.pdf page 12.
 
             """
-            if self.z == 0:
+            if self == self.curve(0, 1, 1):
                 return q
-            if q.z == 0:
+            if q == self.curve(0, 1, 1):
                 return self
             x_p, y_p, z_p = self.x, self.y, self.z
             x_q, y_q, z_q = q.x, q.y, q.z
@@ -141,11 +164,11 @@ class CurveEdwards:
 
             """
             if k == 0:
-                return self.curve(0, 1, 0)
+                return self.curve(0, 1, 1)
             if k < 0:
                 k = -k
                 self = self.neg()
-            res = self.curve(0, 1, 0)
+            res = self.curve(0, 1, 1)
             temp = self
             k = int(k)
             n = k.bit_length()
@@ -156,8 +179,6 @@ class CurveEdwards:
                 if (k >> n) & 1:
                     res = res.add(self)
                 k &= ~(1 << n)
-            if res.z == 0:
-                return self.curve(1, 0, 0)
             return res
 
         def multi_scalar_mul(self, k1, other, k2):
@@ -175,13 +196,13 @@ class CurveEdwards:
             s1 = abs(int(s1))
 
             if s0 == 0 and s1 == 0:
-                return self.curve(0, 1, 0)
+                return self.curve(0, 1, 1)
 
             if s1 > s0:
                 s0, p0, s1, p1 = s1, p1, s0, p0
             # s1 ≤ s0
 
-            res = self.curve(0, 1, 0)
+            res = self.curve(0, 1, 1)
             prec = [[res, p1], [p0, p0.add(p1)]]
             s0 = int(s0)
             s1 = int(s1)
@@ -194,9 +215,20 @@ class CurveEdwards:
                 s1 &= ~(1 << n)
             return res
 
-        def is_prime_order(self, N):
-            """Returns the boolean corresponding to `self.order() == N`."""
-            return self.naive_mul(N).x == 0
+        def is_prime_order(self, n):
+            """Returns the boolean corresponding to `self.order() == n`.
+
+            Bandersnatch has only points of order 2 or r (or infinity).
+            For other curves, other cases could happen.
+
+            """
+            if self == self.curve(0, 1, 1):
+                return n == 0
+            n_times_p = self.naive_mul(n)
+            if n == 2:  # TODO: does it work in the general case?
+                return n_times_p.z == 0 or self == self.curve(0, -1, 1)
+            else:
+                return n_times_p == self.curve(0, 1, 1)
 
         def φ(self):
             """Endomorphism sqrt(-2).
@@ -205,13 +237,13 @@ class CurveEdwards:
             Obtained from `sage tests/φ_edwards.sage`.
 
             """
-            ay4 = 0x5d149954d89e9ae0796a0a7bcd57a1c5a8cb126b81e2333f8b1c3362af1673f3
-            ay2z2 = 0x471115903c695fcf3153011b2354fe7fc1f7385cb321eaf52e422633906c1199
-            az4 = 0x36eef32fe7d73d4462bbecd2e886a5b521811d030558648d889f592edf5fb3d1
-            by2 = 0x4b37256660a3d1343b42833f3d7e7cc77921a3766303c1b1d00a4126765bff2e
-            bz2 = 0x721f22321a0a7afe7c81a39b08e55cd926a687b17dde811c7ddbb0f949dca6c0
-            cy2 = 0x20b21e58881722d68c92fa09709ea65d716e869843e94c821df033483694a51a
-            cz2 = 0x28b681ecc8f9ac13f7f754c8cc235b3dda9c008c9cfa9a4d2ff5bed889a400d3
+            ay4 = 0x1d46e71b2d28e06c42bc1f5a41f4a0156d070863689e8862eb12927f72f308c3
+            ay2z2 = 0x20b21e58881722d68c92fa09709ea65d716e869843e94c821df033483694a51a
+            az4 = 0x1373fe65dcb354e5209f902de5b37008d6c2721d8d6d5fb556e8b7e969c053c9
+            by2 = 0x33937d60e9a0dd55ed1f9030e7c8b6fa9c42e1e41d2f1361a0fed9630f711cae
+            bz2 = 0x39a33e54438fe0155ae18e93205d4395acfe4be1127ca6458fc0270450b1b50d
+            cy2 = 0x2cdc91c2ed341d7901e6d6ece64cd98591c66ba64cdc7109d1bdd9cb6f93ee68
+            cz2 = 0x405a29f23ffc9ff2461a47d721d9210ab77ac21ee2cf489d5f01269bf08ee353
 
             x = self.x
             y = self.y
@@ -221,18 +253,18 @@ class CurveEdwards:
             z_r = y * z**2 * (cy2 * y**2 + cz2 * z**2)
             return self.curve(x_r, y_r, z_r)
 
-        def glv(self, k, constant_time=False):
+        def glv(self, k):
             """GLV scalar multiplication `k`*`self`.
 
-            A constant time option is available.
+            WARNING: this does not work when k = r for example!!!!!!!
             Reference:
             https://www.iacr.org/archive/crypto2001/21390189.pdf
-            Obtained from `sage tests/φ_edwards.sage`.
 
             """
             if k == 0:
-                return self.curve(0, 1, 0)
+                return self.curve(0, 1, 1)
 
+            # TODO repeated elements here. Can be cleaned in `tests/φ_edwards.sage`.
             M1 = [-113482231691339203864511368254957623327,
                   10741319382058138887739339959866629956]
             M2 = [21482638764116277775478679919733259912,
@@ -240,8 +272,9 @@ class CurveEdwards:
             N1 = [-113482231691339203864511368254957623327,
                   10741319382058138887739339959866629956]
 
-            b = [round(mpq(k*N1[0], self.curve.r)),
-                 round(mpq(k*N1[1], self.curve.r))]
+            b = [floor(mpq(k*N1[0], self.curve.r)),
+                 floor(mpq(k*N1[1], self.curve.r))]
+
             k1 = k-b[0] * M1[0] - b[1] * M2[0]
             k2 = -b[0] * M1[1] - b[1] * M2[1]
             return self.multi_scalar_mul(k1, self.φ(), k2)
