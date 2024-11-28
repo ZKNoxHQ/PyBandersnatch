@@ -5,6 +5,10 @@ from field import Field
 from curve_edwards import CurveEdwards
 import sys
 from random import randint
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(script_dir, 'curve_edwards_test_vectors.py')
 
 
 class TestCurveEdwards(unittest.TestCase):
@@ -16,7 +20,7 @@ class TestCurveEdwards(unittest.TestCase):
 
         """
         try:
-            with open("tests/curve_edwards_test_vectors.py", "r") as file:
+            with open(file_path, "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
@@ -118,8 +122,11 @@ class TestCurveEdwards(unittest.TestCase):
         self.assertEqual(
             k1_p_plus_k2_q, test_vectors['k1_times_p_plus_k2_times_q'])
 
-        # edge cases
+    def test_multi_scalar_mul(self):
+        """k1*p + k2*q using small scalars -3 ≤ k1,k2 < 3"""
+        E, test_vectors = self.set_up_curve()
         p = test_vectors['p']
+        q = test_vectors['q']
         for k1 in range(-3, 3):
             for k2 in range(-3, 3):
                 tmp1 = p.multi_scalar_mul(k1, q, k2)
@@ -164,7 +171,7 @@ class TestCurveEdwards(unittest.TestCase):
         """Generation of the small x order r point as in the test vectors"""
         E, test_vectors = self.set_up_curve()
         # Small x generator
-        x = 6
+        x = 0
         g = E(E.field(0), E.field(1), E.field(0))
         while not (g.is_prime_order(E.r)):
             x += 1
@@ -177,34 +184,6 @@ class TestCurveEdwards(unittest.TestCase):
             g_2 = E(E.field(x), E.field(-y.value), E.field(1))
         self.assertTrue(g.is_prime_order(E.r))
         self.assertIn(E.generator, [g, g_2])
-
-    # # def test_slow_add(self):
-    # #     E, test_vectors = self.set_up_curve()
-    # #     p = test_vectors['p']
-    # #     q = test_vectors['q']
-    # #     r = p.slow_add(q)
-    # #     self.assertEqual(r, test_vectors["p_plus_q"])
-
-    # def test_mul_rfc_7748(self):
-    #     E, test_vectors = self.set_up_curve()
-    #     k = 13  # test_vectors['k']
-    #     k_times_p = test_vectors['p'].mul_rfc_7748(k)
-    #     k_times_p_naive = test_vectors['p'].naive_mul(k)
-    #     self.assertEqual(k_times_p, k_times_p_naive)
-
-    # def test_constant_time_multi_scalar_mul(self):
-    #     """k1*p + k2*q from test vectors using constant time"""
-    #     E, test_vectors = self.set_up_curve()
-    #     q = test_vectors['q']
-    #     p_minus_q = test_vectors['p_minus_q']
-    #     k1 = test_vectors['k1']
-    #     k2 = test_vectors['k2']
-    #     k1_p_plus_k2_q_1 = test_vectors['p'].multi_scalar_mul(
-    #         k1, q, k2, p_minus_q, True)
-    #     k1_p_plus_k2_q_2 = test_vectors['p'].multi_scalar_mul(
-    #         k1, q, k2, p_minus_q, False)
-    #     self.assertEqual(
-    #         k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
 
     def run_all_test(self):
         print("Tests for Curve")
@@ -221,4 +200,3 @@ class TestCurveEdwards(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-# TestCurveEdwards.test_j_invariant()

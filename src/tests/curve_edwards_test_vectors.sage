@@ -15,9 +15,13 @@ assert (E.order() % r == 0)
 # Bandersnatch, Edwards model
 # 2017-212, equation (6)
 a_ed, d_ed = (A+2)/B, (A-2)/B
+# Isomorphism to get a=5
+assert (a_ed/5).is_square()
+sqrt_a_ed_5 = (a_ed/5).sqrt()
+a_ed, d_ed = Fp(5), d_ed/a_ed*5
 
 # generator
-gx = 6
+gx = 1
 while not ((1-a_ed*gx**2)/(1-d_ed*gx**2)).is_square():
     gx = -gx
     if gx > 0:
@@ -36,7 +40,7 @@ def to_mg(P):
 def to_ed(P):
     # 2017-212, equations (4) and (5)
     x, y = to_mg(P)
-    u = x/y
+    u = x/y * sqrt_a_ed_5
     v = (x-1)/(x+1)
     return u, v
 
@@ -55,19 +59,23 @@ assert a_ed * u**2 + v**2 == 1+d_ed * u**2*v**2
 
 
 def φ(p):
-    # see rmX and smX in `φ.sage`
-    x_p, y_p = to_ed(p)
-    α = 0x50281ac0f92fc1b29d2a646fe1f5beb21ec0cb08e81f589296d082245cf9382d
-    y1 = 0x2123b4c7a71956a2d149cacda650bd7d2516918bf263672811f0feb1e8daef4d
-    y2 = 0x52c9f28b828426a561f00d3a63511a882ea712770d9af4d6ee0f014d172510b4
-    β = 0x52c9f28b828426a561f00d3a63511a882ea712770d9af4d6ee0f014d172510b4
-    y3 = 0x231d3dfa72b4af2d818763ac3629f247733f1d83fd9d3d50e3f6732dae64a8b7
-    y4 = 0x50d06958b6e8ce1ab1b2745bd377e5bde07e867f02611eae1c098cd1519b574a
-    y5 = 0x150f478323e54389c182cabeeae1fa155d29c5c24b3e595703e518e7e336084c
-    y6 = 0x5ede5fd005b839be71b70d491ebfddeff693de40b4c002a7fc1ae7171cc9f7b5
-    return α * x_p/y_p * (y_p-y1) * (y_p-y2),  β * (y_p-y3) * (y_p-y4) / ((y_p-y5) * (y_p-y6))
+    # endomorphism in affine coordinates as in 2021/1152.pdf
+    x_p, y_p = p[0]/p[2], p[1]/p[2]
+    alpha = E.division_polynomial(2).roots()[0][0]
+    P = E.lift_x(alpha)
+    phi0, phi1 = E.isogeny(P)
+    E2 = E.isogeny_codomain(P)
+    # Isomorphism
+    u = (E.a4()/E2.a4()).sqrt().sqrt()
+    assert u**4 == E.a4()/E2.a4() and u**6 == E.a6()/E2.a6()
+    rX = phi0(y=1) * u**2
+    sX = phi1(y=1) * u**3
+    return (rX(x=x_p, y=y_p), y_p * sX(x=x_p, y=y_p), 1)
+
 
 # GENERATION OF TEST VECTORS
+xx, yy, zz = φ(p)
+assert zz == 1 and yy**2 == xx**3 + a*xx + b
 
 
 def test_vector_point(p, name, ws=True):
@@ -83,6 +91,7 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
+print("# File generated using `sage `curve_edwards_test_vectors.sage > curve_edwards_test_vectors.py`.")
 print("F = Field({})".format(hex(Fp.characteristic())))
 print("a = F({})".format(a_ed))
 print("d = F({})".format(d_ed))
@@ -95,7 +104,7 @@ test_vector_point(q, 'q')
 test_vector_point(2*p, 'p_double')
 test_vector_point(p+q, 'p_plus_q')
 test_vector_point(p-q, 'p_minus_q')
-test_vector_point(λ*p, 'φ_p')
+test_vector_point(φ(p), 'φ_p')
 test_vector_point(k*p, 'k_times_p')
 test_vector_point(k1*p, 'k1_times_p')
 test_vector_point(k2*p, 'k2_times_p')

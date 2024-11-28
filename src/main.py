@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
 import argparse
-
 from bench.curve_bench import BenchCurve
+from bench.curve_edwards_bench import BenchCurveEdwards
 from bench.field_bench import BenchField
 from curve import Curve
 from field import Field
 from key_exchange import KeyExchange
+from tests.curve_edwards_test import TestCurveEdwards
 from tests.curve_test import TestCurve
 from tests.field_test import TestField
 from tests.key_exchange_test import TestKeyExchange
+import sys
+import os
+
+# Add the project root to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
 def run_specific_function(args, classes):
@@ -34,8 +40,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 # Classes to consider
-    test_classes = [TestField(), TestCurve(), TestKeyExchange()]
-    bench_classes = [BenchField(), BenchCurve()]
+    test_classes = [TestField(), TestCurve(
+    ), TestCurveEdwards(), TestKeyExchange()]
+    bench_classes = [BenchField(), BenchCurve(), BenchCurveEdwards()]
 
     if args.function:
         run_specific_function(args, test_classes + bench_classes)

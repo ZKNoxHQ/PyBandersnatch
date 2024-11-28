@@ -4,17 +4,6 @@ from field import Field
 from gmpy2 import mpq, mpz, mod
 
 
-def constant_time_swap(swap_flag, a, b):
-    """Constant time swap function."""
-    swap_flag = int(bool(swap_flag))
-    # TODO check if this mask is okay
-    mask = - swap_flag
-
-    a_new = (a & ~mask) | (b & mask)
-    b_new = (b & ~mask) | (a & mask)
-    return a_new, b_new
-
-
 class CurveEdwards:
     def __init__(self, a, d, r, h):
         self.field = a.field
@@ -23,8 +12,8 @@ class CurveEdwards:
         self.r = r
         self.h = h
         self.a24 = (self.a+2)/4
-        self.generator = self.Point(self.field(7), self.field(
-            0x235457268dc35abadcdc624195cc7b4a4120ba5dafc2ff78a175dbfac93f0e1), self.field(1), self)
+        self.generator = self.Point(self.field(1), self.field(
+            0x39c8932646733e6987574d2c518adfb172294f2c8c95981c0c95f8188762dd7a), self.field(1), self)
 
     def __repr__(self):
         return "Edwards curve defined by {}*x^2 + y^2 = 1 + {} * x^2*y^2".format(self.a, self.d)
@@ -213,16 +202,16 @@ class CurveEdwards:
             """Endomorphism sqrt(-2).
 
             TODO can be optimized with factorization of multi-variable polynomials.
-            See `φ_edwards.sage`
+            Obtained from `sage tests/φ_edwards.sage`.
 
             """
-            ay4 = 29383402791444715812312926704650189547673388783797463002400347466510460773686
-            ay2z2 = 15368314922454316444756542535690517526678109144486783213468874155618746940568
-            az4 = 7684157461227158222378271267845258763339054572243391606734437077809373470359
-            by2 = 52435875175126190306190499204503349898877075966140498909091035261670483034113
-            bz2 = 44922620537870368594095327973889896350488427517309671271801177667137524076210
-            cy2 = 44922620537870368247580845366524664472861474448535393444775930790601327775410
-            cz2 = 173257241303682615938813476534387138913512623438268098150400
+            ay4 = 0x5d149954d89e9ae0796a0a7bcd57a1c5a8cb126b81e2333f8b1c3362af1673f3
+            ay2z2 = 0x471115903c695fcf3153011b2354fe7fc1f7385cb321eaf52e422633906c1199
+            az4 = 0x36eef32fe7d73d4462bbecd2e886a5b521811d030558648d889f592edf5fb3d1
+            by2 = 0x4b37256660a3d1343b42833f3d7e7cc77921a3766303c1b1d00a4126765bff2e
+            bz2 = 0x721f22321a0a7afe7c81a39b08e55cd926a687b17dde811c7ddbb0f949dca6c0
+            cy2 = 0x20b21e58881722d68c92fa09709ea65d716e869843e94c821df033483694a51a
+            cz2 = 0x28b681ecc8f9ac13f7f754c8cc235b3dda9c008c9cfa9a4d2ff5bed889a400d3
 
             x = self.x
             y = self.y
@@ -238,7 +227,7 @@ class CurveEdwards:
             A constant time option is available.
             Reference:
             https://www.iacr.org/archive/crypto2001/21390189.pdf
-            More information in the file `φ.sage`.
+            Obtained from `sage tests/φ_edwards.sage`.
 
             """
             if k == 0:
@@ -264,22 +253,3 @@ class CurveEdwards:
 
             """
             return self.glv(k)
-
-        # # def slow_add(self, q):
-        # #     """Compute the addition `self` ± `q`.
-
-        # #     It is not a differential addition, but requires the computation of the y-coordinates with sqrt.
-        # #     TODO optimized.
-        # #     Reference:
-        # #     https://www.iacr.org/archive/eurocrypt2014/84410275/84410275.pdf page 8.
-
-        # #     """
-        # #     x_p = self.x/self.z
-        # #     x_q = q.x/q.z
-        # #     a = self.curve.a
-        # #     b = self.curve.b
-
-        # #     y_p = ((x_p**3 + a*x_p**2 + x_p)/b).sqrt()
-        # #     y_q = ((x_q**3 + a*x_q**2 + x_q)/b).sqrt()
-
-        # #     return self.curve(b * (x_q * y_p - x_p*y_q)**2 / (x_p*x_q*(x_p-x_q)**2), 1)

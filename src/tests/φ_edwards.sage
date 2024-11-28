@@ -17,6 +17,11 @@ assert (E.order() % r == 0)
 # Bandersnatch, Edwards model
 # 2017-212, equation (6)
 a_ed, d_ed = (A+2)/B, (A-2)/B
+# Isomorphism to get a=5
+assert (a_ed/5).is_square()
+sqrt_a_ed_5 = (a_ed/5).sqrt()
+a_ed, d_ed = Fp(5), d_ed / a_ed * 5
+
 
 Fpxy = Fp['x', 'y']
 x, y = Fpxy.gens()
@@ -46,10 +51,10 @@ assert ws2mg_x(mg2ws_x, mg2ws_y) == X
 assert mg2ws_y(ws2mg_x, ws2mg_y) == Y
 
 # Conversion Montgomery <-> (twisted) Edwards
-mg2ed_x = X/Y
+mg2ed_x = X/Y * sqrt_a_ed_5
 mg2ed_y = (X-1)/(X+1)
 ed2mg_x = (1+Y) / (1-Y)
-ed2mg_y = (1+Y)/(1-Y)/X
+ed2mg_y = (1+Y)/(1-Y) / (X/sqrt_a_ed_5)
 assert ed2mg_x(mg2ed_x, mg2ed_y) == X
 assert mg2ed_y(ed2mg_x, ed2mg_y) == Y
 
@@ -67,14 +72,22 @@ r_ed_XY = ws2ed_x(rX(x=ed2ws_x), ed2ws_y * sX(x=ed2ws_x))
 s_ed_XY = ws2ed_y(x=rX(x=ed2ws_x))
 
 # Point in Weierstrass model
-P = E.random_point()
+
+
+P = E(31511963179209183026886029814959507395230513391536014203721350106469568871776,
+      45347120062487836513813256222005391829075297965413648488198604153937949600247)
 xP = P[0]
 yP = P[1]
 assert yP**2 == xP**3 + a*xP + b
 
+# Point in Montgomery model
+xxP = ws2mg_x(xP, yP)
+yyP = ws2mg_y(xP, yP)
+assert B*yyP**2 == xxP**3 + A * xxP**2 + xxP
+
 # Point in Edwards model
-xPP = ws2ed_x(xP, yP)
-yPP = ws2ed_y(xP, yP)
+xPP = mg2ed_x(xxP, yyP)
+yPP = mg2ed_y(xxP, yyP)
 assert a_ed * xPP**2 + yPP**2 == 1 + d_ed * xPP**2 * yPP**2
 
 # Endomorphism in Weierstrass model
@@ -93,23 +106,23 @@ assert ws2ed_y(φxP, φyP) == s_ed_XY(xPP, yPP)
 
 
 # Efficient endomorphism
-# r_ed_XY = α * (x/y)  * (y-y1) * (y-y2)
-r_num_y = r_ed_XY.numerator()(x=1).factor()
-r_den_y = r_ed_XY.denominator()(x=1).factor()
-y1 = r_num_y[0][0].coefficients()[1]
-y2 = r_num_y[1][0].coefficients()[1]
-α = r_num_y.unit()/r_den_y.unit()
-assert α * x/y * (y-y1) * (y-y2) == r_ed_XY
+# # r_ed_XY = α * (x/y)  * (y-y1) * (y-y2)
+# r_num_y = r_ed_XY.numerator()(x=1).factor()
+# r_den_y = r_ed_XY.denominator()(x=1).factor()
+# y1 = r_num_y[0][0].coefficients()[1]
+# y2 = r_num_y[1][0].coefficients()[1]
+# α = r_num_y.unit()/r_den_y.unit()
+# assert α * x/y * (y-y1) * (y-y2) == r_ed_XY
 
 
-s_num_y = s_ed_XY.numerator()(x=1).factor()
-s_den_y = s_ed_XY.denominator()(x=1).factor()
-y3 = s_num_y[0][0].coefficients()[1]
-y4 = s_num_y[1][0].coefficients()[1]
-y5 = s_den_y[0][0].coefficients()[1]
-y6 = s_den_y[1][0].coefficients()[1]
-β = s_num_y.unit()/s_den_y.unit()
-assert β * (y-y3) * (y-y4) / ((y-y5) * (y-y6)) == s_ed_XY
+# s_num_y = s_ed_XY.numerator()(x=1).factor()
+# s_den_y = s_ed_XY.denominator()(x=1).factor()
+# y3 = s_num_y[0][0].coefficients()[1]
+# y4 = s_num_y[1][0].coefficients()[1]
+# y5 = s_den_y[0][0].coefficients()[1]
+# y6 = s_den_y[1][0].coefficients()[1]
+# β = s_num_y.unit()/s_den_y.unit()
+# assert β * (y-y3) * (y-y4) / ((y-y5) * (y-y6)) == s_ed_XY
 
 
 Fpxyz = Fp['x', 'y', 'z']
@@ -123,6 +136,7 @@ a = rXYZ.numerator() * sXYZ.denominator()
 b = sXYZ.numerator() * rXYZ.denominator()
 c = rXYZ.denominator() * sXYZ.denominator()
 
+
 # Hand-made simplification
 a_yz = a(x=1)
 b_yz = Fpxyz(b(x=1) / (Y*Z**2))
@@ -131,45 +145,26 @@ assert a == X * a_yz
 assert b == Y * Z**2 * b_yz
 assert c == Y * Z**2 * c_yz
 
-# α = a_y.factor().unit() / b_y.factor().unit() / c_y.factor().unit()
-# print("α = {}".format(hex(α)))
-# i = 1
-# for (f, m) in a_y.factor():
-#     assert m == 1
-#     print("y{} = {}".format(i, hex(f.coefficients()[1])))
-#     i += 1
+[ay4, ay2z2, az4] = a_yz.coefficients()
+[by2, bz2] = b_yz.coefficients()
+[cy2, cz2] = c_yz.coefficients()
+print("ay4 = {}".format(hex(ay4)))
+print("ay2z2 = {}".format(hex(ay2z2)))
+print("az4 = {}".format(hex(az4)))
+print("by2 = {}".format(hex(by2)))
+print("bz2 = {}".format(hex(bz2)))
+print("cy2 = {}".format(hex(cy2)))
+print("cz2 = {}".format(hex(cz2)))
 
-# for (f, m) in b_y.factor():
-#     assert m == 1
-#     print("y{} = {}".format(i, hex(f.coefficients()[1])))
-#     i += 1
+assert (xPP * a_yz(y=yPP, z=1) / (yPP * 1**2 * c_yz(y=yPP, z=1)) == xt)
+assert (yPP * 1**2 * b_yz(y=yPP, z=1) / (yPP * 1**2 * c_yz(y=yPP, z=1)) == yt)
 
-# for (f, m) in c_y.factor():
-#     assert m == 1
-#     print("y{} = {}".format(i, hex(f.coefficients()[1])))
-#     i += 1
-
-# # (x:y:z) -> ( α*x*(y-y1)*(y-y2)*(y-y3)*(y-y4) : z*y*(y-y5)*(y-y6) : z*y*(y-y7)*(y-y8) )
-# α = 0x2a663dfd1dd00cfdf4703c9e5b21fd0b7ce422cfabe66b62404f84e8f20e8cb
-# y1 = 0x150f478323e54389c182cabeeae1fa155d29c5c24b3e595703e518e7e336084c
-# y2 = 0x2123b4c7a71956a2d149cacda650bd7d2516918bf263672811f0feb1e8daef4d
-# y3 = 0x52c9f28b828426a561f00d3a63511a882ea712770d9af4d6ee0f014d172510b4
-# y4 = 0x5ede5fd005b839be71b70d491ebfddeff693de40b4c002a7fc1ae7171cc9f7b5
-# y5 = 0x231d3dfa72b4af2d818763ac3629f247733f1d83fd9d3d50e3f6732dae64a8b7
-# y6 = 0x50d06958b6e8ce1ab1b2745bd377e5bde07e867f02611eae1c098cd1519b574a
-# y7 = 0x150f478323e54389c182cabeeae1fa155d29c5c24b3e595703e518e7e336084c
-# y8 = 0x5ede5fd005b839be71b70d491ebfddeff693de40b4c002a7fc1ae7171cc9f7b5
-# assert X * a_y.factor().unit() * (y-y1)*(y-y2)*(y-y3)*(y-y4) / Z / Y/c_y == rXYZ
-
-
-# # Projective equation Y²Z = X³ + δZ³
-# # assert (b**2 * c * (X**3 + β * Z**3)) == (Z*a)**3 + δ*(Z*c)**3
 
 # GLV decomposition
 λ = -8913659658109529928382530854484400854125314752504019737736543920008458395397
 [M1, M2] = Matrix([[-λ, 1], [r, 0]]).LLL()
 assert ((M1[0] + λ * M1[1]) % r == 0)
 N1 = (r * Matrix([M1, M2])**-1)[0]
-print(M1)
-print(M2)
-print(N1)
+print("M1 = [{}, {}]".format(M1[0], M1[1]))
+print("M2 = [{}, {}]".format(M2[0], M2[1]))
+print("N1 = [{}, {}]".format(N1[0], N1[1]))

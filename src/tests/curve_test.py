@@ -5,6 +5,10 @@ from field import Field
 from curve import Curve
 import sys
 from random import randint
+import os
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(script_dir, 'curve_test_vectors.py')
 
 
 class TestCurve(unittest.TestCase):
@@ -16,7 +20,7 @@ class TestCurve(unittest.TestCase):
 
         """
         try:
-            with open("src/tests/curve_test_vectors.py", "r") as file:
+            with open(file_path, "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
