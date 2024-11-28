@@ -86,6 +86,12 @@ class TestCurveEdwards(unittest.TestCase):
         p_double = test_vectors['p'].dbl()
         self.assertEqual(p_double, test_vectors['p_double'])
 
+    def test_dbl_add(self):
+        """p.dbl() == p.add(p)"""
+        E, test_vectors = self.set_up_curve()
+        p = test_vectors['p']
+        self.assertEqual(p.dbl(), p.add(p))
+
     def test_neg(self):
         """p + (-p) = 0"""
         E, test_vectors = self.set_up_curve()
