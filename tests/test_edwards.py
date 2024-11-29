@@ -1,30 +1,24 @@
 # -*- coding: utf-8 -*-
-import inspect
 import unittest
-from field import Field
-from curve_edwards import CurveEdwards
-import sys
+from src.field import Field
+from src.curve.edwards import Edwards
 from random import randint
-import os
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, 'curve_edwards_test_vectors.py')
 
 
-class TestCurveEdwards(unittest.TestCase):
+class TestEdwards(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
 
-        Test vectors generated using the file `curve_test_vectors.sage`.
+        Test vectors generated using the file `tests/vectors/edwards.sage`.
 
         """
         try:
-            with open(file_path, "r") as file:
+            with open('tests/vectors/edwards.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
-                "The file 'curve_edwards_test_vectors.py' was not found. Please generate it using `sage curve_edwards_test_vectors.sage > curve_edwards_test_vectors.py`.")
+                "The file 'tests/vectors/edwards.py' was not found. Please generate it using `sage Edwards_edwards_test_vectors.sage > Edwards_edwards_test_vectors.py`.")
         return E, test_vectors  # type: ignore
 
     def test_j_invariant(self):
@@ -213,7 +207,7 @@ class TestCurveEdwards(unittest.TestCase):
         # self.assertTrue(p_order_2_3.is_prime_order(2))
 
     def run_all_test(self):
-        print("Tests for Curve")
+        print("Tests for Edwards")
         print("------")
         for method_name in dir(self):
             if method_name.startswith("test_"):

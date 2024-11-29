@@ -19,6 +19,8 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = F({})".format(name, hex(k)))
 
 
+print("# File generated using `sage sage/field.sage > tests/vectors/field.py`.")
+print("from src.field import Field")
 print("p = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001")
 print("F = Field(p)")
 print("test_vectors = {}")

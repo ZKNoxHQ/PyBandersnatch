@@ -98,13 +98,15 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
-print("# File generated using `sage `curve_edwards_test_vectors.sage > curve_edwards_test_vectors.py`.")
+print("# File generated using `sage sage/edwards.sage > tests/vectors/edwards.py`.")
+print("from src.field import Field")
+print("from src.curve.edwards import Edwards")
 print("F = Field({})".format(hex(Fp.characteristic())))
 print("a = F({})".format(a_ed))
 print("d = F({})".format(d_ed))
 print("r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1")
 print("h = 4")
-print("E = CurveEdwards(a, d, r, h)")
+print("E = Edwards(a, d, r, h)")
 print("test_vectors = {}")
 test_vector_point(p, 'p')
 test_vector_point(q, 'q')

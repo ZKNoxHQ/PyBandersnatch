@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
-import inspect
+from src.curve.montgomery import Montgomery
+from src.field import Field
 import unittest
-from field import Field
-from curve import Curve
-import sys
 from random import randint
-import os
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, 'curve_test_vectors.py')
 
 
-class TestCurve(unittest.TestCase):
+class TestMontgomery(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
@@ -20,7 +14,7 @@ class TestCurve(unittest.TestCase):
 
         """
         try:
-            with open(file_path, "r") as file:
+            with open('tests/vectors/montgomery.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
@@ -183,7 +177,7 @@ class TestCurve(unittest.TestCase):
             k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
 
     def run_all_test(self):
-        print("Tests for Curve")
+        print("Tests for Montgomery")
         print("------")
         for method_name in dir(self):
             if method_name.startswith("test_"):

@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
+from src.field import Field
 import unittest
-from field import Field
-import os
-
-script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, 'field_test_vectors.py')
 
 
 class TestField(unittest.TestCase):
@@ -16,7 +12,7 @@ class TestField(unittest.TestCase):
 
         """
         try:
-            with open(file_path, "r") as file:
+            with open('tests/vectors/field.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(

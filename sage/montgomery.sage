@@ -32,7 +32,7 @@ k2 = 8683555061824981937504960049179714114
 
 
 def φ_minus_one(p):
-    # see `φ.sage`
+    # see `φ_montgomery.sage`
     X, Y = to_mg(p)
     α = Fp(13017314467421381532402061398313046228820690393386411611562176812113295071440)
     β = Fp(14989411347484419666605643019079533103863186413725217032868654387860539633484)
@@ -41,7 +41,7 @@ def φ_minus_one(p):
 
 
 def φ(p):
-    # see rmX and smX in `φ.sage`
+    # see rmX and smX in `φ_montgomery.sage`
     X, Y = to_mg(p)
     a1 = 26217937587563095239723870254092982918845276250263818911301829349969290592256
     a2 = 14989411347484419663140498193005880785086916883037474254598401919095177670475
@@ -63,13 +63,15 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
-print("# File generated using `sage `curve_test_vectors.sage > curve_test_vectors.py`.")
+print("# File generated using `sage sage/montgomery.sage > tests/vectors/montgomery.py`.")
+print("from src.field import Field")
+print("from src.curve.montgomery import Montgomery")
 print("F = Field(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)")
 print("a = F(0x4247698f4e32ad45a293959b4ca17afa4a2d2317e4c6ce5023e1fd63d1b5de98)")
 print("b = F(5)")
 print("r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1")
 print("h = 4")
-print("E = Curve(a, b, r, h)")
+print("E = Montgomery(a, b, r, h)")
 print("test_vectors = {}")
 test_vector_point(p, 'p')
 test_vector_point(q, 'q')

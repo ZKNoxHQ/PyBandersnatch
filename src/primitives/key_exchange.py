@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import random
 import unittest
-from field import Field
-from curve import Curve
+from src.field import Field
+from src.curve.montgomery import Montgomery
 
 
 class KeyExchange:

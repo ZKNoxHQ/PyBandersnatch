@@ -8,6 +8,28 @@ We implement the XZ-only Montgomery representation of the curve in order to impr
 The project is written in Python.
 The integer arithmetic is computed using `gmpy2`, a wrapper to the efficient `gmp` library written in `C`.
 
+## Commands
+
+### Install
+```
+make install
+```
+
+### Generator test vectors
+```
+make gen_test_vec
+```
+
+### Tests
+```
+make test
+```
+
+### Benchmarks
+```
+make benchmark
+```
+
 ## Montgomery model arithmetic
 We follow Sections 3.2, 3.3 of [this paper](https://eprint.iacr.org/2017/212.pdf) for the $XZ$-only arithmetic of Bandersnatch:
 

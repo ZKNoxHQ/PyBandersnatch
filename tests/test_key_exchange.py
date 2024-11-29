@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
-from curve import Curve
-from field import Field
-from key_exchange import KeyExchange
+from src.curve.montgomery import Montgomery
+from src.field import Field
+from src.primitives.key_exchange import KeyExchange
 
 
 class TestKeyExchange(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestKeyExchange(unittest.TestCase):
         b = F(5)
         r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
         h = 4
-        E = Curve(a, b, r, h)
+        E = Montgomery(a, b, r, h)
         key_exchange = KeyExchange(E, secret)
         return key_exchange
 

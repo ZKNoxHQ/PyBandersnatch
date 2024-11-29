@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import argparse
-from field import Field
 from gmpy2 import mpq, mpz, mod
 
 
@@ -15,7 +13,7 @@ def constant_time_swap(swap_flag, a, b):
     return a_new, b_new
 
 
-class Curve:
+class Montgomery:
     def __init__(self, a, b, r, h):
         self.field = a.field
         self.a = a
@@ -259,7 +257,7 @@ class Curve:
         def φ_minus_one(self):
             """Endomorphism sqrt(-2) - [1].
 
-            More information in the file `φ.sage`.
+            More information in the file `φ_montgomery.sage`.
 
             """
             α = self.curve.field(
@@ -276,7 +274,7 @@ class Curve:
             A constant time option is available.
             Reference:
             https://www.iacr.org/archive/crypto2001/21390189.pdf
-            More information in the file `φ.sage`.
+            More information in the file `φ_montgomery.sage`.
 
             """
             if k == 0:

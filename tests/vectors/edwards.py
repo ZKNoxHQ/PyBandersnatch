@@ -1,10 +1,12 @@
-# File generated using `sage `curve_edwards_test_vectors.sage > curve_edwards_test_vectors.py`.
+# File generated using `sage sage/edwards.sage > tests/vectors/edwards.py`.
+from src.field import Field
+from src.curve.edwards import Edwards
 F = Field(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)
 a = F(52435875175126190479447740508185965837690552500527637822603658699938581184508)
 d = F(45022363124591815672509500913686876175488063829319466900776701791074614335719)
 r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
 h = 4
-E = CurveEdwards(a, d, r, h)
+E = Edwards(a, d, r, h)
 test_vectors = {}
 test_vectors['p'] = E(F(0x1cc6ee38139c1c110223537a8ce79d067e58cc1067c6fbb7d8b3a1b08dfc8f08), F(0x70a5894a64445438d015ac32ba360f092cde44bab11fc2b7d4b5c0d216228cce), F(1))
 test_vectors['q'] = E(F(0x2a2086fc8de76abcc75c48528de91cf68fb8ce4c04f80b94b071315dfff66db8), F(0x6765f125acbdd10815bedbffe1147d36cf5c501f7ad467f4cd12aeec62a7ef1f), F(1))

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-import argparse
 from math import floor
-from field import Field
+from src.field import Field
 from gmpy2 import mpq, mpz, mod
 
 
-class CurveEdwards:
+class Edwards:
     def __init__(self, a, d, r, h):
         self.field = a.field
         self.a = a

@@ -1,24 +1,21 @@
 # -*- coding: utf-8 -*-
-from field import Field
-from curve import Curve
-import sys
-from random import randint
 from timeit import timeit
+import unittest
 
 
-class BenchCurve:
+class BenchMontgomery(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
 
-        Test vectors generated using the file `curve_test_vectors.sage`.
+        Test vectors generated using `sage sage/montgomery.sage > tests/vectors/montgomery.py`.
 
         """
-        with open("src/tests/curve_test_vectors.py", "r") as file:
+        with open("tests/vectors/montgomery.py", "r") as file:
             exec(file.read(), globals())
         return E, test_vectors  # type: ignore
 
-    def bench_glv(self):
+    def test_bench_glv(self):
         """Benchmark GLV and the naive scalar multiplication using `p` and `k`."""
         E, test_vectors = self.set_up_curve()
         k = test_vectors['k']

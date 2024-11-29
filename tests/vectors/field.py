@@ -1,3 +1,5 @@
+# File generated using `sage sage/field.sage > tests/vectors/field.py`.
+from src.field import Field
 p = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
 F = Field(p)
 test_vectors = {}
