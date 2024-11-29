@@ -8,7 +8,7 @@ We implement the XZ-only Montgomery model and the twisted Edwards model of the c
 The project is written in Python.
 The integer arithmetic is computed using `gmpy2`, a wrapper to the efficient `gmp` library written in `C`.
 
-## Commands
+## How to use
 
 ### Install
 ```
@@ -30,7 +30,9 @@ make test
 make benchmark
 ```
 
-## Montgomery model arithmetic
+## Montgomery model
+
+### Group law
 We follow Sections 3.2, 3.3 of [this paper](https://eprint.iacr.org/2017/212.pdf) for the $XZ$-only arithmetic of Bandersnatch:
 
 $$\begin{array}{rl}
@@ -48,7 +50,7 @@ The choice of model influences the cost of additions and doubling of the curve. 
 * The **short Weierstrass** model computes a doubling in **10** multiplications and an addition in **12** multiplications,
 * The **Montgomery** model computes a doubling in **4** multiplications and an addition in **6** multiplications. This model is the most efficient, but the addition requires the knowledge of $x(P-Q)$ in order to compute $x(P+Q)$. Also, this model represents the points of the curve up to a sign.
 
-## GLV in XZ-only coordinates
+### GLV in XZ-only coordinates
 Bandersnatch is designed so that it has an efficient endomorphism $\psi$. In $XZ$-only coordinates, this endomorphism is given in [this paper](https://eprint.iacr.org/2021/1152.pdf) (page 6):
 
 $$\begin{array}{rl}
@@ -95,3 +97,12 @@ Replacing $r(X_P)$, we obtain a simple expression with three field elements $α,
 $$X(P-φ(P)) = \frac{αX_P(X_P+Z_Pβ)²}{Z_P(X_P+γZ_P)²}$$
 
 This expression can be precomputed with few multiplications in order to apply the GLV technique.
+
+## Twisted Edwards model
+We follow TODO.
+
+## Group law
+TODO
+
+### GLV in twisted Edwards coordinates
+TODO
