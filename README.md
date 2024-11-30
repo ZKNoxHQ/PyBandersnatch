@@ -15,7 +15,7 @@ The integer arithmetic is computed using `gmpy2`, a wrapper to the efficient `gm
 make install
 ```
 
-### Generator test vectors
+### Generate test vectors (optional, requires `sage`)
 ```
 make gen_test_vec
 ```
