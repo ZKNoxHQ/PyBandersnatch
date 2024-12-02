@@ -15,7 +15,7 @@ It allows ZK proofs computed with BLS12-381, a pairing-friendly curve designed f
 ```
 make install
 ```
-As of today, for mac OS, gmpy2 is not supported by brew, so it is required to run a venv to run the library:
+As of today, for mac OS, `gmpy2` is not supported by brew, so it is required to run a venv to run the library:
 
 ```
 python3 -m venv path/to/venv 
