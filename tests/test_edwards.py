@@ -206,18 +206,8 @@ class TestEdwards(unittest.TestCase):
         # p_order_2_3 = test_vectors['p_order_2_3']
         # self.assertTrue(p_order_2_3.is_prime_order(2))
 
-    def run_all_test(self):
-        print("Tests for Edwards")
-        print("------")
-        for method_name in dir(self):
-            if method_name.startswith("test_"):
-                method = getattr(self, method_name)
-                if callable(method):
-                    print(f"Running: {method_name}")
-                    method()
-        print("------")
-        print()
-
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_encode_decode(self):
+        E, test_vectors = self.set_up_curve()
+        p = test_vectors['p']
+        enc_p = p.encode_base(256)
+        assert E.decode_base(enc_p, 256) == p

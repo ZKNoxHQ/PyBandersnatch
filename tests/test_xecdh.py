@@ -2,7 +2,7 @@
 import unittest
 from src.curve.montgomery import Montgomery
 from src.field import Field
-from src.primitives.key_exchange import KeyExchange
+from src.primitives.xecdh import xECDH
 
 
 class TestKeyExchange(unittest.TestCase):
@@ -15,7 +15,7 @@ class TestKeyExchange(unittest.TestCase):
         r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
         h = 4
         E = Montgomery(a, b, r, h)
-        key_exchange = KeyExchange(E, secret)
+        key_exchange = xECDH(E, secret)
         return key_exchange
 
     def test_key_exchange(self):
@@ -24,15 +24,3 @@ class TestKeyExchange(unittest.TestCase):
         key1 = alice.compute_shared_secret(bob.public_key)
         key2 = bob.compute_shared_secret(alice.public_key)
         self.assertEqual(key1, key2)
-
-    def run_all_test(self):
-        print("Tests for KeyExchange")
-        print("------")
-        for method_name in dir(self):
-            if method_name.startswith("test_"):
-                method = getattr(self, method_name)
-                if callable(method):
-                    print(f"Running: {method_name}")
-                    method()
-        print("------")
-        print()

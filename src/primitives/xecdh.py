@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 import random
-import unittest
 from src.field import Field
 from src.curve.montgomery import Montgomery
 
 
-class KeyExchange:
+class xECDH:
     def __init__(self, curve, private_key=None):
         self.curve = curve
         self.private_key = private_key or self.generate_private_key()
         self.public_key = self.generate_public_key()
 
     def generate_private_key(self):
-        """Generates a private key as a random integer modulo r."""
+        """Generates a private key as a random integer modulo r.
+
+        WARNING: not secure.
+
+        """
         return random.randint(1, self.curve.r - 1)
 
     def generate_public_key(self):

@@ -29,11 +29,3 @@ class BenchMontgomery(unittest.TestCase):
 
         print("Naive mul: {:.2f} ms; GLV: {:.2f} ms ({:.0f}% faster)".format(
             naive_mul_time/n_iter*10**3, glv_time / n_iter*10**3, glv_time/naive_mul_time*100))
-
-    def run_all_bench(self):
-        for method_name in dir(self):
-            if method_name.startswith("bench_"):
-                method = getattr(self, method_name)
-                if callable(method):
-                    print(f"Running: {method_name}")
-                    method()

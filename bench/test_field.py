@@ -66,11 +66,3 @@ class BenchField(unittest.TestCase):
     #         print("\tTime for mul: {:.2f}μs".format(t_mul*10**6))
     #         print("\tTime for add: {:.2f}μs".format(t_add*10**6))
     #         print("\tTime for div: {:.2f}μs".format(t_div*10**6))
-
-    def run_all_bench(self):
-        for method_name in dir(self):
-            if method_name.startswith("bench_"):
-                method = getattr(self, method_name)
-                if callable(method):
-                    print(f"Running: {method_name}")
-                    method()

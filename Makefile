@@ -1,3 +1,6 @@
+.SILENT: clean test benchmark
+MAKEFLAGS += --no-print-directory
+
 install:
 	pip install -r requirements.txt
 
@@ -12,7 +15,11 @@ gen_test_vec:
 	make clean
 
 test:
-	python -m unittest discover -s tests
+	@if [ -z "$(TEST)" ]; then \
+		python -m unittest discover -s tests; \
+	else \
+		python -m unittest tests.$(TEST); \
+	fi
 	make clean
 
 benchmark:

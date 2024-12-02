@@ -24,6 +24,10 @@ make gen_test_vec
 ```
 make test
 ```
+For testing only one specific function (for example here `test_sign_verify`):
+```
+make test TEST=test_eddsa.TestEdDSA.test_sign_verify
+```
 
 ### Benchmarks
 ```

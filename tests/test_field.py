@@ -59,15 +59,3 @@ class TestField(unittest.TestCase):
         self.assertFalse(test_vectors['non_square'].is_square())
         for i in range(F.non_square.value):
             self.assertTrue(F(i).is_square())
-
-    def run_all_test(self):
-        print("Tests for Field")
-        print("------")
-        for method_name in dir(self):
-            if method_name.startswith("test_"):
-                method = getattr(self, method_name)
-                if callable(method):
-                    print(f"Running: {method_name}")
-                    method()
-        print("------")
-        print()

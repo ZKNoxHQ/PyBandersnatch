@@ -47,6 +47,35 @@ class Edwards:
         d = self.d
         return 16*(a**2 + 14*a*d + d**2)**3 / (a*d*(a-d)**4)
 
+    def decode_base(self, s, b):
+        """Decoding following the formate of RFC 8032.
+
+        Reference: https://datatracker.ietf.org/doc/html/rfc8032
+
+        """
+        # Check that point encoding is the correct length.
+        if len(s) != b//8:
+            return (None, None)
+        # Extract signbit.
+        xs = s[(b-1)//8] >> ((b-1) & 7)
+        # Decode y.  If this fails, fail.
+        p = self.field.p
+        rv = int.from_bytes(s, byteorder="little") % (2**(b-1))
+        y = self.field(rv) if rv < p else None
+        if y is None:
+            return (None, None)
+        # ax² + y² = 1 + dx²y² => x² = (1-y²)/(a -dy²)
+        # Try to recover x.
+        # If it does not exist, or if zero and xs are wrong, fail.
+        x = ((1-y**2)/(self.a-self.d*y**2)).sqrt()
+        if x is None or (x == 0 and xs != (x.value % p) % 2):
+            return (None, None)
+        # If sign of x isn't correct, flip it.
+        if (x.value % p) % 2 != xs:
+            x = -x
+        # Return the constructed point.
+        return self(x, y, 1)
+
     class Point:
         def __init__(self, x, y, z, curve):
             self.x = x
@@ -285,3 +314,16 @@ class Edwards:
 
             """
             return self.glv(k)
+
+        def encode_base(self, b):
+            """Decoding following the formate of RFC 8032.
+
+            Reference: https://datatracker.ietf.org/doc/html/rfc8032
+
+            """
+            xp, yp = self.x/self.z, self.y/self.z
+            p = self.curve.field.p
+            s = bytearray(int(yp.value % p).to_bytes(b//8, byteorder='little'))
+            if (xp.value % p) % 2 != 0:
+                s[(b-1)//8] |= 1 << (b-1) % 8
+            return s

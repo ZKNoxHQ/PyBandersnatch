@@ -175,15 +175,3 @@ class TestMontgomery(unittest.TestCase):
             k1, q, k2, p_minus_q, False)
         self.assertEqual(
             k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
-
-    def run_all_test(self):
-        print("Tests for Montgomery")
-        print("------")
-        for method_name in dir(self):
-            if method_name.startswith("test_"):
-                method = getattr(self, method_name)
-                if callable(method):
-                    print(f"Running: {method_name}")
-                    method()
-        print("------")
-        print()
