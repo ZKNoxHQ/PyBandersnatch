@@ -23,5 +23,9 @@ test:
 	make clean
 
 benchmark:
-	python -m unittest discover -s bench
+	@if [ -z "$(BENCH)" ]; then \
+		python -m unittest discover -s bench; \
+	else \
+		python -m unittest bench.$(BENCH); \
+	fi
 	make clean
