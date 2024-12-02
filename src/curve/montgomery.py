@@ -258,7 +258,7 @@ class Montgomery:
         def φ_minus_one(self):
             """Endomorphism sqrt(-2) - [1].
 
-            More information in the file `φ_montgomery.sage`.
+            More information in the file `φ.sage`.
 
             """
             α = self.curve.field(
@@ -275,7 +275,7 @@ class Montgomery:
             A constant time option is available.
             Reference:
             https://www.iacr.org/archive/crypto2001/21390189.pdf
-            More information in the file `φ_montgomery.sage`.
+            More information in the file `φ.sage`.
 
             """
             if k == 0:

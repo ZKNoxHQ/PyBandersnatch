@@ -49,7 +49,7 @@ Y_{φ(P)} &= Y_P\cdot r(X_P)
 \end{array}$$
 
 for a rational function $r(X_P) \in \mathbb F_p(X_P)$.
-This function can be derived using SageMath (see [here](src/tests/φ.sage)).
+This function can be derived using SageMath (see [here](sage/φ.sage)).
 From this, the addition formula simplifies when we add $P$ and $φ(P)$:
 
 $$

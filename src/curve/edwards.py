@@ -262,7 +262,7 @@ class Edwards:
             """Endomorphism sqrt(-2).
 
             TODO can be optimized with factorization of multi-variable polynomials.
-            Obtained from `sage tests/φ_edwards.sage`.
+            Obtained using `sage sage/φ.sage`.
 
             """
             ay4 = 0x1d46e71b2d28e06c42bc1f5a41f4a0156d070863689e8862eb12927f72f308c3
