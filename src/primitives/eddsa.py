@@ -44,7 +44,7 @@ class EdDSA:
         """
         h = hashlib.sha512(self.private_key).digest()
         a = int.from_bytes(h[:32], "little")
-        a &= (1 << 254) - 8
+        a &= (1 << 254) - 8  # ensure no multiple of 4
         a |= (1 << 254)
         prefix = h[32:]
         A = (a*self.curve.generator).encode_base(256)
