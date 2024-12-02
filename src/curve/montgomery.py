@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from math import floor
 from gmpy2 import mpq, mpz, mod
 
 
@@ -279,16 +280,14 @@ class Montgomery:
             """
             if k == 0:
                 return self.curve(1, 0)
-            M1 = [113482231691339203864511368254957623327,
-                  10741319382058138887739339959866629956]
-            M2 = [21482638764116277775478679919733259912, -
-                  113482231691339203864511368254957623327]
-            N1 = [113482231691339203864511368254957623327,
-                  10741319382058138887739339959866629956]
-            b = [round(mpq(k*N1[0], self.curve.r)),
-                 round(mpq(k*N1[1], self.curve.r))]
-            k1 = k-b[0] * M1[0] - b[1] * M2[0]
-            k2 = -b[0] * M1[1] - b[1] * M2[1]
+            # sign difference with Edwards model
+            m1 = int(113482231691339203864511368254957623327)
+            m2 = int(10741319382058138887739339959866629956)
+            m3 = int(21482638764116277775478679919733259912)
+            b = [floor(mpq(k*m1, self.curve.r)),
+                 floor(mpq(k*m2, self.curve.r))]
+            k1 = k-b[0] * m1 - b[1] * m3
+            k2 = -b[0] * m2 - b[1] * -m1
             return self.multi_scalar_mul(k1, self.φ(), k2, self.φ_minus_one(), constant_time=constant_time)
 
         def __rmul__(self, k, constant_time=False):
