@@ -71,7 +71,7 @@ class TestEdwards(unittest.TestCase):
         """p+q from test vectors"""
         E, test_vectors = self.set_up_curve()
         q = test_vectors['q']
-        p_plus_q = test_vectors['p'].add(q)
+        p_plus_q = test_vectors['p'] + q
         self.assertEqual(p_plus_q, test_vectors['p_plus_q'])
 
     def test_dbl(self):
@@ -81,17 +81,17 @@ class TestEdwards(unittest.TestCase):
         self.assertEqual(p_double, test_vectors['p_double'])
 
     def test_dbl_add(self):
-        """p.dbl() == p.add(p)"""
+        """p.dbl() == p + p"""
         E, test_vectors = self.set_up_curve()
         p = test_vectors['p']
-        self.assertEqual(p.dbl(), p.add(p))
+        self.assertEqual(p.dbl(), p+p)
 
     def test_neg(self):
         """p + (-p) = 0"""
         E, test_vectors = self.set_up_curve()
         p = test_vectors['p']
         minus_p = p.neg()
-        self.assertEqual(p.add(minus_p), E(0, 1, 1))
+        self.assertEqual(p + minus_p, E(0, 1, 1))
 
     def test_scalar_mul(self):
         """k*p from test vectors"""
@@ -130,7 +130,7 @@ class TestEdwards(unittest.TestCase):
         for k1 in range(-3, 3):
             for k2 in range(-3, 3):
                 tmp1 = p.multi_scalar_mul_2(k1, q, k2)
-                self.assertEqual(tmp1, p.naive_mul(k1).add(q.naive_mul(k2)))
+                self.assertEqual(tmp1, p.naive_mul(k1) + q.naive_mul(k2))
 
     def test_glv(self):
         """GLV technique for k*p from test vectors"""

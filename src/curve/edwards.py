@@ -183,6 +183,9 @@ class Edwards:
             z_r = f*g
             return self.curve(x_r, y_r, z_r)
 
+        def __add__(self, q):
+            return self.add(q)
+
         def naive_mul(self, k):
             """Scalar multiplication `k` * `self`.
 
@@ -205,43 +208,9 @@ class Edwards:
                 res = res.dbl()
                 n -= 1
                 if (k >> n) & 1:
-                    res = res.add(self)
+                    res += self
                 k &= ~(1 << n)
             return res
-
-        # def multi_scalar_mul_glv(self, k1, other, k2):
-        #     """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
-
-        #     From most significant bit (MSB) to least significant bit (LSB)
-        #     TODO not constant time.
-
-        #     """
-            # s0, s1, p0, p1 = k1, k2, self, other
-
-            # p0 = p0.neg() if int(s0) < 0 else p0
-            # p1 = p1.neg() if int(s1) < 0 else p1
-            # s0 = abs(int(s0))
-            # s1 = abs(int(s1))
-
-            # if s0 == 0 and s1 == 0:
-            #     return self.curve(0, 1, 1)
-
-            # if s1 > s0:
-            #     s0, p0, s1, p1 = s1, p1, s0, p0
-            # # s1 ≤ s0
-
-            # res = self.curve(0, 1, 1)
-            # prec = [[res, p1], [p0, p0.add(p1)]]
-            # s0 = int(s0)
-            # s1 = int(s1)
-            # n = s0.bit_length()
-            # while n > 0:
-            #     res = res.dbl()
-            #     n -= 1
-            #     res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1])
-            #     s0 &= ~(1 << n)
-            #     s1 &= ~(1 << n)
-            # return res
 
         def multi_scalar_mul_2(self, k, q, l):
             """Compute k*self + l*q using GLV trick. It is a four-dimensional scalar multiplication."""
@@ -298,19 +267,19 @@ class Edwards:
             prec[0][0][0][0] = res
             prec[0][0][0][1] = p3
             prec[0][0][1][0] = p2
-            prec[0][0][1][1] = p2.add(p3)
+            prec[0][0][1][1] = p2 + p3
             prec[0][1][0][0] = p1
-            prec[0][1][0][1] = p1.add(p3)
-            prec[0][1][1][0] = p1.add(p2)
-            prec[0][1][1][1] = prec[0][0][1][1].add(p1)
+            prec[0][1][0][1] = p1 + p3
+            prec[0][1][1][0] = p1 + p2
+            prec[0][1][1][1] = prec[0][0][1][1] + p1
             prec[1][0][0][0] = p0
-            prec[1][0][0][1] = p0.add(p3)
-            prec[1][0][1][0] = p0.add(p2)
-            prec[1][0][1][1] = prec[0][0][1][1].add(p0)
-            prec[1][1][0][0] = p0.add(p1)
-            prec[1][1][0][1] = prec[1][0][0][1].add(p1)
-            prec[1][1][1][0] = prec[1][1][0][0].add(p2)
-            prec[1][1][1][1] = prec[1][1][1][0].add(p3)
+            prec[1][0][0][1] = p0 + p3
+            prec[1][0][1][0] = p0 + p2
+            prec[1][0][1][1] = prec[0][0][1][1] + p0
+            prec[1][1][0][0] = p0 + p1
+            prec[1][1][0][1] = prec[1][0][0][1] + p1
+            prec[1][1][1][0] = prec[1][1][0][0] + p2
+            prec[1][1][1][1] = prec[1][1][1][0] + p3
             s0 = int(s0)
             s1 = int(s1)
             s2 = int(s2)
@@ -319,8 +288,8 @@ class Edwards:
             while n > 0:
                 res = res.dbl()
                 n -= 1
-                res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1]
-                              [(s2 >> n) & 1][(s3 >> n) & 1])
+                res += prec[(s0 >> n) & 1][(s1 >> n) &
+                                           1][(s2 >> n) & 1][(s3 >> n) & 1]
                 s0 &= ~(1 << n)
                 s1 &= ~(1 << n)
                 s2 &= ~(1 << n)
@@ -400,14 +369,14 @@ class Edwards:
             # s1 ≤ s0
 
             res = self.curve(0, 1, 1)
-            prec = [[res, p1], [p0, p0.add(p1)]]
+            prec = [[res, p1], [p0, p0+p1]]
             s0 = int(s0)
             s1 = int(s1)
             n = s0.bit_length()
             while n > 0:
                 res = res.dbl()
                 n -= 1
-                res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1])
+                res = res + prec[(s0 >> n) & 1][(s1 >> n) & 1]
                 s0 &= ~(1 << n)
                 s1 &= ~(1 << n)
             return res
