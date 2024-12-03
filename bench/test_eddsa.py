@@ -17,10 +17,22 @@ class BenchEdDSA(unittest.TestCase):
         return EdDSA(E)  # type: ignore
 
     def test_bench_eddsa_sign(self):
-        """Benchmark GLV and the naive scalar multiplication using `p` and `k`."""
+        """Benchmark signature computation."""
         global user
         user = self.set_up_signature()
         n_iter = 50
         sign_time = timeit(
             "s = user.sign(\"This is a benchmark of a signature computation\")", globals=globals(), number=n_iter)
-        print("Signature time: {:.2f}ms".format(sign_time/n_iter * 10**3))
+        print("Signature computation time: {:.2f}ms".format(
+            sign_time/n_iter * 10**3))
+
+    def test_bench_eddsa_verif(self):
+        """Benchmark signature verification."""
+        global user, sig
+        user = self.set_up_signature()
+        sig = user.sign("This is a benchmark of a signature verification")
+        n_iter = 50
+        verif_time = timeit(
+            "v = user.verify(\"This is a benchmark of a signature verification\", sig)", globals=globals(), number=n_iter)
+        print("Signature verification time: {:.2f}ms".format(
+            verif_time/n_iter * 10**3))
