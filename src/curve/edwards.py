@@ -311,7 +311,6 @@ class Edwards:
             prec[1][1][0][1] = prec[1][0][0][1].add(p1)
             prec[1][1][1][0] = prec[1][1][0][0].add(p2)
             prec[1][1][1][1] = prec[1][1][1][0].add(p3)
-            # prec = [[res, p1], [p0, p0.add(p1)]]
             s0 = int(s0)
             s1 = int(s1)
             s2 = int(s2)
@@ -387,6 +386,7 @@ class Edwards:
 
             p0, p1 = self, self.φ()
 
+            # Multi scalar multiplication with small scalars
             p0 = p0.neg() if int(s0) < 0 else p0
             p1 = p1.neg() if int(s1) < 0 else p1
             s0 = abs(int(s0))
