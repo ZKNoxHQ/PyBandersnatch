@@ -122,7 +122,7 @@ class TestEdwards(unittest.TestCase):
         self.assertEqual(
             k1_p_plus_k2_q, test_vectors['k1_times_p_plus_k2_times_q'])
 
-    def test_multi_scalar_mul(self):
+    def test_multi_scalar_mul_small_scalars(self):
         """k1*p + k2*q using small scalars -3 ≤ k1,k2 < 3"""
         E, test_vectors = self.set_up_curve()
         p = test_vectors['p']
