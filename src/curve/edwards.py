@@ -209,38 +209,123 @@ class Edwards:
                 k &= ~(1 << n)
             return res
 
-        def multi_scalar_mul(self, k1, other, k2):
-            """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
+        # def multi_scalar_mul_glv(self, k1, other, k2):
+        #     """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
+
+        #     From most significant bit (MSB) to least significant bit (LSB)
+        #     TODO not constant time.
+
+        #     """
+            # s0, s1, p0, p1 = k1, k2, self, other
+
+            # p0 = p0.neg() if int(s0) < 0 else p0
+            # p1 = p1.neg() if int(s1) < 0 else p1
+            # s0 = abs(int(s0))
+            # s1 = abs(int(s1))
+
+            # if s0 == 0 and s1 == 0:
+            #     return self.curve(0, 1, 1)
+
+            # if s1 > s0:
+            #     s0, p0, s1, p1 = s1, p1, s0, p0
+            # # s1 ≤ s0
+
+            # res = self.curve(0, 1, 1)
+            # prec = [[res, p1], [p0, p0.add(p1)]]
+            # s0 = int(s0)
+            # s1 = int(s1)
+            # n = s0.bit_length()
+            # while n > 0:
+            #     res = res.dbl()
+            #     n -= 1
+            #     res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1])
+            #     s0 &= ~(1 << n)
+            #     s1 &= ~(1 << n)
+            # return res
+
+        def multi_scalar_mul_2(self, k, q, l):
+            """Compute k*self + l*q using GLV trick. It is a four-dimensional scalar multiplication."""
+            if k == 0 and l == 0:
+                return self.curve(0, 1, 1)
+
+            m1 = int(-113482231691339203864511368254957623327)
+            m2 = int(10741319382058138887739339959866629956)
+            m3 = int(21482638764116277775478679919733259912)
+            b = [floor(mpq(k*m1, self.curve.r)),
+                 floor(mpq(k*m2, self.curve.r))]
+            k1 = k-b[0] * m1 - b[1] * m3
+            k2 = -b[0] * m2 - b[1] * -m1
+
+            b = [floor(mpq(l*m1, self.curve.r)),
+                 floor(mpq(l*m2, self.curve.r))]
+            l1 = l-b[0] * m1 - b[1] * m3
+            l2 = -b[0] * m2 - b[1] * -m1
+
+            return self.multi_scalar_mul_4(k1, self.φ(), k2, q, l1, q.φ(), l2)
+
+        def multi_scalar_mul_4(self, k1, q, k2, r, k3, s, k4):
+            """Multi scalar multiplication `k1` * `self` + `k2` * `q` + `k3` * `r` + `k4` * `s`.
 
             From most significant bit (MSB) to least significant bit (LSB)
             TODO not constant time.
 
             """
-            s0, s1, p0, p1 = k1, k2, self, other
+            s0, s1, s2, s3, p0, p1, p2, p3 = k1, k2, k3, k4, self, q, r, s
 
             p0 = p0.neg() if int(s0) < 0 else p0
             p1 = p1.neg() if int(s1) < 0 else p1
+            p2 = p2.neg() if int(s2) < 0 else p2
+            p3 = p3.neg() if int(s3) < 0 else p3
             s0 = abs(int(s0))
             s1 = abs(int(s1))
+            s2 = abs(int(s2))
+            s3 = abs(int(s3))
 
-            if s0 == 0 and s1 == 0:
+            if s0 == 0 and s1 == 0 and s2 == 0 and s3 == 0:
                 return self.curve(0, 1, 1)
 
             if s1 > s0:
                 s0, p0, s1, p1 = s1, p1, s0, p0
-            # s1 ≤ s0
+            if s2 > s0:
+                s0, p0, s2, p2 = s2, p2, s0, p0
+            if s3 > s0:
+                s0, p0, s3, p3 = s3, p3, s0, p0
+            # s1,s2,s3 ≤ s0
 
             res = self.curve(0, 1, 1)
-            prec = [[res, p1], [p0, p0.add(p1)]]
+            prec = [[[[None]*2 for _ in range(2)]
+                     for _ in range(2)] for _ in range(2)]
+            prec[0][0][0][0] = res
+            prec[0][0][0][1] = p3
+            prec[0][0][1][0] = p2
+            prec[0][0][1][1] = p2.add(p3)
+            prec[0][1][0][0] = p1
+            prec[0][1][0][1] = p1.add(p3)
+            prec[0][1][1][0] = p1.add(p2)
+            prec[0][1][1][1] = prec[0][0][1][1].add(p1)
+            prec[1][0][0][0] = p0
+            prec[1][0][0][1] = p0.add(p3)
+            prec[1][0][1][0] = p0.add(p2)
+            prec[1][0][1][1] = prec[0][0][1][1].add(p0)
+            prec[1][1][0][0] = p0.add(p1)
+            prec[1][1][0][1] = prec[1][0][0][1].add(p1)
+            prec[1][1][1][0] = prec[1][1][0][0].add(p2)
+            prec[1][1][1][1] = prec[1][1][1][0].add(p3)
+            # prec = [[res, p1], [p0, p0.add(p1)]]
             s0 = int(s0)
             s1 = int(s1)
+            s2 = int(s2)
+            s3 = int(s3)
             n = s0.bit_length()
             while n > 0:
                 res = res.dbl()
                 n -= 1
-                res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1])
+                res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1]
+                              [(s2 >> n) & 1][(s3 >> n) & 1])
                 s0 &= ~(1 << n)
                 s1 &= ~(1 << n)
+                s2 &= ~(1 << n)
+                s3 &= ~(1 << n)
             return res
 
         def is_prime_order(self, n):
@@ -297,9 +382,35 @@ class Edwards:
             m3 = int(21482638764116277775478679919733259912)
             b = [floor(mpq(k*m1, self.curve.r)),
                  floor(mpq(k*m2, self.curve.r))]
-            k1 = k-b[0] * m1 - b[1] * m3
-            k2 = -b[0] * m2 - b[1] * -m1
-            return self.multi_scalar_mul(k1, self.φ(), k2)
+            s0 = k-b[0] * m1 - b[1] * m3
+            s1 = -b[0] * m2 - b[1] * -m1
+
+            p0, p1 = self, self.φ()
+
+            p0 = p0.neg() if int(s0) < 0 else p0
+            p1 = p1.neg() if int(s1) < 0 else p1
+            s0 = abs(int(s0))
+            s1 = abs(int(s1))
+
+            if s0 == 0 and s1 == 0:
+                return self.curve(0, 1, 1)
+
+            if s1 > s0:
+                s0, p0, s1, p1 = s1, p1, s0, p0
+            # s1 ≤ s0
+
+            res = self.curve(0, 1, 1)
+            prec = [[res, p1], [p0, p0.add(p1)]]
+            s0 = int(s0)
+            s1 = int(s1)
+            n = s0.bit_length()
+            while n > 0:
+                res = res.dbl()
+                n -= 1
+                res = res.add(prec[(s0 >> n) & 1][(s1 >> n) & 1])
+                s0 &= ~(1 << n)
+                s1 &= ~(1 << n)
+            return res
 
         def __rmul__(self, k):
             """Scalar multiplication with the scalar give first.

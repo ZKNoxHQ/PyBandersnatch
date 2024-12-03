@@ -15,7 +15,7 @@ class BenchEdwards(unittest.TestCase):
             exec(file.read(), globals())
         return E, test_vectors  # type: ignore
 
-    def test_bench_multi_scalar_mul(self):
+    def test_bench_multi_scalar_mul_2(self):
         """Benchmark GLV and the naive scalar multiplication using `p` and `k`."""
         E, test_vectors = self.set_up_curve()
         global k, p, q
@@ -27,7 +27,7 @@ class BenchEdwards(unittest.TestCase):
         naive_mul_time = timeit("res_1 = (k*p).add(k*q)",
                                 globals=globals(), number=n_iter)
 
-        multi_scalar_mul_time = timeit("res_2 = p.multi_scalar_mul(k,q,k)",
+        multi_scalar_mul_time = timeit("res_2 = p.multi_scalar_mul_2(k,q,k)",
                                        globals=globals(), number=n_iter)
 
         print("Edwards curve\nNaive multi scalar mul: {:.2f} ms; MSM: {:.2f} ms ({:.0f}% faster)".format(

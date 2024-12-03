@@ -79,6 +79,6 @@ class EdDSA:
             return False
         h = int.from_bytes(hashlib.sha512(
             Rs + self.public_key + str.encode(msg)).digest(), "little") % self.curve.r
-        s_b_minus_h_A = self.curve.generator.multi_scalar_mul(
+        s_b_minus_h_A = self.curve.generator.multi_scalar_mul_2(
             s, A, self.curve.r-h)
         return s_b_minus_h_A == R  # sB-hA == R ?

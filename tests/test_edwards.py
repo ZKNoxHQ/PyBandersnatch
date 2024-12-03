@@ -111,25 +111,25 @@ class TestEdwards(unittest.TestCase):
         k2_times_p = test_vectors['p'].naive_mul(k2)
         self.assertEqual(k2_times_p, test_vectors['k2_times_p'])
 
-    def test_multi_scalar_mul(self):
+    def test_multi_scalar_mul_2(self):
         """k1*p + k2*q from test vectors"""
         E, test_vectors = self.set_up_curve()
         q = test_vectors['q']
         k1 = test_vectors['k1']
         k2 = test_vectors['k2']
-        k1_p_plus_k2_q = test_vectors['p'].multi_scalar_mul(
+        k1_p_plus_k2_q = test_vectors['p'].multi_scalar_mul_2(
             k1, q, k2)
         self.assertEqual(
             k1_p_plus_k2_q, test_vectors['k1_times_p_plus_k2_times_q'])
 
-    def test_multi_scalar_mul_small_scalars(self):
+    def test_multi_scalar_mul_2_small_scalars(self):
         """k1*p + k2*q using small scalars -3 ≤ k1,k2 < 3"""
         E, test_vectors = self.set_up_curve()
         p = test_vectors['p']
         q = test_vectors['q']
         for k1 in range(-3, 3):
             for k2 in range(-3, 3):
-                tmp1 = p.multi_scalar_mul(k1, q, k2)
+                tmp1 = p.multi_scalar_mul_2(k1, q, k2)
                 self.assertEqual(tmp1, p.naive_mul(k1).add(q.naive_mul(k2)))
 
     def test_glv(self):
