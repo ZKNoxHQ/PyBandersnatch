@@ -24,8 +24,8 @@ test:
 
 benchmark:
 	@if [ -z "$(BENCH)" ]; then \
-		python -m unittest discover -s bench; \
+		python -m unittest discover -s bench -q; \
 	else \
-		python -m unittest bench.$(BENCH); \
+		python -m unittest bench.$(BENCH) -q; \
 	fi
 	make clean
