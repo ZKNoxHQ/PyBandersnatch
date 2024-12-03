@@ -42,7 +42,6 @@ make test TEST=test_eddsa.TestEdDSA.test_sign_verify
 ```
 make benchmark
 ```
-```
 For benchmarking only one specific function (for example `test_bench_eddsa_sign`):
 ```
 make benchmark BENCH=test_eddsa.BenchEdDSA.test_bench_eddsa_sign
