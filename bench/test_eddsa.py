@@ -16,7 +16,7 @@ class BenchEdDSA(unittest.TestCase):
             exec(file.read(), globals())
         return EdDSA(E)  # type: ignore
 
-    def test_bench_eddsa_sign(self):
+    def test_bench_sign(self):
         """Benchmark signature computation."""
         global user
         user = self.set_up_signature()
@@ -26,7 +26,7 @@ class BenchEdDSA(unittest.TestCase):
         print("Signature computation time: {:.2f}ms".format(
             sign_time/n_iter * 10**3))
 
-    def test_bench_eddsa_verif(self):
+    def test_bench_verif(self):
         """Benchmark signature verification."""
         global user, sig
         user = self.set_up_signature()
