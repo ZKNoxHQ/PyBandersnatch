@@ -34,7 +34,7 @@ class EdDSA:
         a = int.from_bytes(h[:32], "little")
         a &= (1 << 254) - 8
         a |= (1 << 254)
-        return (a * self.curve.generator).encode_base(256)
+        return (a * self.curve.g).encode_base(256)
 
     def sign(self, msg):
         """Signature of a message.
@@ -47,10 +47,10 @@ class EdDSA:
         a &= (1 << 254) - 8  # ensure no multiple of 4
         a |= (1 << 254)
         prefix = h[32:]
-        A = (a*self.curve.generator).encode_base(256)
+        A = (a*self.curve.g).encode_base(256)
         r = int.from_bytes(hashlib.sha512(
             prefix + str.encode(msg)).digest(), "little") % self.curve.r
-        R = r * self.curve.generator
+        R = r * self.curve.g
         Rs = R.encode_base(256)
         h = int.from_bytes(hashlib.sha512(
             Rs+A+str.encode(msg)).digest(), "little") % self.curve.r
@@ -79,6 +79,6 @@ class EdDSA:
             return False
         h = int.from_bytes(hashlib.sha512(
             Rs + self.public_key + str.encode(msg)).digest(), "little") % self.curve.r
-        s_b_minus_h_A = self.curve.generator.multi_scalar_mul_2(
+        s_b_minus_h_A = self.curve.g.multi_scalar_mul_2(
             s, A, self.curve.r-h)
         return s_b_minus_h_A == R  # sB-hA == R ?

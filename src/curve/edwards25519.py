@@ -4,7 +4,7 @@ from src.field import Field
 from gmpy2 import mpq, mpz, mod
 
 
-class Edwards:
+class Edwards25519:
     def __init__(self, a, d, r, h):
         self.field = a.field
         self.a = a
@@ -12,6 +12,20 @@ class Edwards:
         self.r = r
         self.h = h
         self.g = self.generator()
+
+    def __repr__(self):
+        return "Edwards curve defined by {}*x^2 + y^2 = 1 + {} * x^2*y^2".format(self.a, self.d)
+
+    __str__ = __repr__
+
+    def __call__(self, x, y, z):
+        if isinstance(x, int) or isinstance(x, mpz):
+            x = self.field(x)
+        if isinstance(y, int) or isinstance(y, mpz):
+            y = self.field(y)
+        if isinstance(z, int) or isinstance(z, mpz):
+            z = self.field(z)
+        return self.Point(x, y, z, self)
 
     def generator(self):
         """Generator with small x-coordinate."""
@@ -27,20 +41,6 @@ class Edwards:
             # TODO: what about -y?
             g = self(self.field(x), self.field(y.value), self.field(1))
         return g
-
-    def __repr__(self):
-        return "Edwards curve defined by {}*x^2 + y^2 = 1 + {} * x^2*y^2".format(self.a, self.d)
-
-    __str__ = __repr__
-
-    def __call__(self, x, y, z):
-        if isinstance(x, int) or isinstance(x, mpz):
-            x = self.field(x)
-        if isinstance(y, int) or isinstance(y, mpz):
-            y = self.field(y)
-        if isinstance(z, int) or isinstance(z, mpz):
-            z = self.field(z)
-        return self.Point(x, y, z, self)
 
     def random(self):
         """Returns a random point of `self`."""
@@ -226,26 +226,6 @@ class Edwards:
                 k &= ~(1 << n)
             return res
 
-        def multi_scalar_mul_2(self, k, q, l):
-            """Compute k*self + l*q using GLV trick. It is a four-dimensional scalar multiplication."""
-            if k == 0 and l == 0:
-                return self.curve(0, 1, 1)
-
-            m1 = int(-113482231691339203864511368254957623327)
-            m2 = int(10741319382058138887739339959866629956)
-            m3 = int(21482638764116277775478679919733259912)
-            b = [floor(mpq(k*m1, self.curve.r)),
-                 floor(mpq(k*m2, self.curve.r))]
-            k1 = k-b[0] * m1 - b[1] * m3
-            k2 = -b[0] * m2 - b[1] * -m1
-
-            b = [floor(mpq(l*m1, self.curve.r)),
-                 floor(mpq(l*m2, self.curve.r))]
-            l1 = l-b[0] * m1 - b[1] * m3
-            l2 = -b[0] * m2 - b[1] * -m1
-
-            return self.multi_scalar_mul_4(k1, self.φ(), k2, q, l1, q.φ(), l2)
-
         def multi_scalar_mul_4(self, k1, q, k2, r, k3, s, k4):
             """Multi scalar multiplication `k1` * `self` + `k2` * `q` + `k3` * `r` + `k4` * `s`.
 
@@ -325,83 +305,13 @@ class Edwards:
             else:
                 return n_times_p == self.curve(0, 1, 1)
 
-        def φ(self):
-            """Endomorphism sqrt(-2).
-
-            TODO can be optimized with factorization of multi-variable polynomials.
-            Obtained using `sage sage/φ.sage`.
-
-            """
-            ay4 = 0x1d46e71b2d28e06c42bc1f5a41f4a0156d070863689e8862eb12927f72f308c3
-            ay2z2 = 0x20b21e58881722d68c92fa09709ea65d716e869843e94c821df033483694a51a
-            az4 = 0x1373fe65dcb354e5209f902de5b37008d6c2721d8d6d5fb556e8b7e969c053c9
-            by2 = 0x33937d60e9a0dd55ed1f9030e7c8b6fa9c42e1e41d2f1361a0fed9630f711cae
-            bz2 = 0x39a33e54438fe0155ae18e93205d4395acfe4be1127ca6458fc0270450b1b50d
-            cy2 = 0x2cdc91c2ed341d7901e6d6ece64cd98591c66ba64cdc7109d1bdd9cb6f93ee68
-            cz2 = 0x405a29f23ffc9ff2461a47d721d9210ab77ac21ee2cf489d5f01269bf08ee353
-
-            x = self.x
-            y = self.y
-            z = self.z
-            x_r = x * (ay4 * y**4 + ay2z2 * y**2 * z**2 + az4 * z**4)
-            y_r = y * z**2 * (by2 * y**2 + bz2 * z**2)
-            z_r = y * z**2 * (cy2 * y**2 + cz2 * z**2)
-            return self.curve(x_r, y_r, z_r)
-
-        def glv(self, k):
-            """GLV scalar multiplication `k`*`self`.
-
-            WARNING: this does not work when k = r for example!!!!!!!
-            Reference:
-            https://www.iacr.org/archive/crypto2001/21390189.pdf
-
-            """
-            if k == 0:
-                return self.curve(0, 1, 1)
-
-            m1 = int(-113482231691339203864511368254957623327)
-            m2 = int(10741319382058138887739339959866629956)
-            m3 = int(21482638764116277775478679919733259912)
-            b = [floor(mpq(k*m1, self.curve.r)),
-                 floor(mpq(k*m2, self.curve.r))]
-            s0 = k-b[0] * m1 - b[1] * m3
-            s1 = -b[0] * m2 - b[1] * -m1
-
-            p0, p1 = self, self.φ()
-
-            # Multi scalar multiplication with small scalars
-            p0 = p0.neg() if int(s0) < 0 else p0
-            p1 = p1.neg() if int(s1) < 0 else p1
-            s0 = abs(int(s0))
-            s1 = abs(int(s1))
-
-            if s0 == 0 and s1 == 0:
-                return self.curve(0, 1, 1)
-
-            if s1 > s0:
-                s0, p0, s1, p1 = s1, p1, s0, p0
-            # s1 ≤ s0
-
-            res = self.curve(0, 1, 1)
-            prec = [[res, p1], [p0, p0+p1]]
-            s0 = int(s0)
-            s1 = int(s1)
-            n = s0.bit_length()
-            while n > 0:
-                res = res.dbl()
-                n -= 1
-                res = res + prec[(s0 >> n) & 1][(s1 >> n) & 1]
-                s0 &= ~(1 << n)
-                s1 &= ~(1 << n)
-            return res
-
         def __rmul__(self, k):
             """Scalar multiplication with the scalar give first.
 
             Computed using GLV.
 
             """
-            return self.glv(k)
+            return self.naive_mul(k)
 
         def encode_base(self, b):
             """Decoding following the formate of RFC 8032.
