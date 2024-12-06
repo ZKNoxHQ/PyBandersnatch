@@ -30,7 +30,7 @@ class BenchEdwardsBandersnatch(unittest.TestCase):
         multi_scalar_mul_time = timeit("res_2 = p.multi_scalar_mul_2(k,q,k)",
                                        globals=globals(), number=n_iter)
 
-        print("Edwards curve Bandersnatch:\nNaive multi scalar mul: {:.2f} ms; MSM: {:.2f} ms ({:.0f}% faster)".format(
+        print("Edwards curve Bandersnatch:\n\tNaive multi scalar mul: {:.2f} ms;\n\tMSM: {:.2f} ms ({:.0f}% faster)".format(
             naive_mul_time/n_iter*10**3, multi_scalar_mul_time / n_iter*10**3, (naive_mul_time - multi_scalar_mul_time)/naive_mul_time*100))
 
     def test_bench_glv(self):
@@ -45,5 +45,5 @@ class BenchEdwardsBandersnatch(unittest.TestCase):
         glv_time = timeit("test_vectors['k']*test_vectors['p']",
                           globals=globals(), number=n_iter)
 
-        print("Edwards curve Bandersnatch:\nNaive mul: {:.2f} ms; GLV: {:.2f} ms ({:.0f}% faster)".format(
+        print("Edwards curve Bandersnatch:\n\tNaive mul: {:.2f} ms;\n\tGLV: {:.2f} ms ({:.0f}% faster)".format(
             naive_mul_time/n_iter*10**3, glv_time / n_iter*10**3, (naive_mul_time-glv_time)/naive_mul_time*100))

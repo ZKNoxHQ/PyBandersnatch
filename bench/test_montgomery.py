@@ -27,5 +27,5 @@ class BenchMontgomery(unittest.TestCase):
         glv_time = timeit("test_vectors['k']*test_vectors['p']",
                           globals=globals(), number=n_iter)
 
-        print("Montgomery curve\nNaive mul: {:.2f} ms; GLV: {:.2f} ms ({:.0f}% faster)".format(
+        print("Montgomery curve\n\tNaive mul: {:.2f} ms;\n\tGLV: {:.2f} ms ({:.0f}% faster)".format(
             naive_mul_time/n_iter*10**3, glv_time / n_iter*10**3, (naive_mul_time-glv_time)/naive_mul_time*100))

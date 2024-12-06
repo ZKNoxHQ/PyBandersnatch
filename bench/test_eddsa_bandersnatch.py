@@ -4,7 +4,7 @@ import unittest
 from src.primitives.eddsa import EdDSA
 
 
-class BenchEdDSA(unittest.TestCase):
+class BenchEdDSABandersnatch(unittest.TestCase):
 
     def set_up_signature(self):
         """Creates Bandersnatch elliptic curve.
@@ -23,7 +23,7 @@ class BenchEdDSA(unittest.TestCase):
         n_iter = 50
         sign_time = timeit(
             "s = user.sign(\"This is a benchmark of a signature computation\")", globals=globals(), number=n_iter)
-        print("Signature computation time: {:.2f}ms".format(
+        print("Bandersnatch - DSA\n\tSignature computation time: {:.2f}ms".format(
             sign_time/n_iter * 10**3))
 
     def test_bench_verif(self):
@@ -34,5 +34,5 @@ class BenchEdDSA(unittest.TestCase):
         n_iter = 50
         verif_time = timeit(
             "v = user.verify(\"This is a benchmark of a signature verification\", sig)", globals=globals(), number=n_iter)
-        print("Signature verification time: {:.2f}ms".format(
+        print("Bandersnatch - DSA\n\tSignature verification time: {:.2f}ms".format(
             verif_time/n_iter * 10**3))

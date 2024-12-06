@@ -33,16 +33,16 @@ make gen_test_vec
 ```
 make test
 ```
-For testing only one specific function (for example `test_sign_verify`):
+For testing only one specific function (for example `test_sign_verify` for Bandersnatch):
 ```
-make test TEST=test_eddsa.TestEdDSA.test_sign_verify
+make test TEST=test_eddsa_bandersnatch.TestEdDSABandersnatch.test_sign_verify
 ```
 
 ### Benchmarks
 ```
 make benchmark
 ```
-For benchmarking only one specific function (for example `test_bench_sign`):
+For benchmarking only one specific function (for example `test_bench_sign` for Ed25519):
 ```
-make benchmark BENCH=test_eddsa.BenchEdDSA.test_bench_sign
+make benchmark BENCH=test_eddsa_25519.BenchEdDSA25519.test_bench_sign
 ```
