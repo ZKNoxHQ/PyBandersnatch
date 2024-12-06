@@ -98,15 +98,17 @@ assert c_proj == Y * Z**2 * c_yz
 [ay4, ay2z2, az4] = a_yz.coefficients()
 [by2, bz2] = b_yz.coefficients()
 [cy2, cz2] = c_yz.coefficients()
-print("# Edwards model endomorphism")
-print("ay4 = {}".format(hex(ay4)))
-print("ay2z2 = {}".format(hex(ay2z2)))
-print("az4 = {}".format(hex(az4)))
-print("by2 = {}".format(hex(by2)))
-print("bz2 = {}".format(hex(bz2)))
-print("cy2 = {}".format(hex(cy2)))
-print("cz2 = {}".format(hex(cz2)))
-print()
+# print("# Edwards model endomorphism")
+# print("ay4 = {}".format(hex(ay4)))
+# print("ay2z2 = {}".format(hex(ay2z2)))
+# print("az4 = {}".format(hex(az4)))
+# print("by2 = {}".format(hex(by2)))
+# print("bz2 = {}".format(hex(bz2)))
+# print("cy2 = {}".format(hex(cy2)))
+# print("cz2 = {}".format(hex(cz2)))
+# print()
+cyz = 0  # this is for being able to implement non-GLV curve the same way as GLV curve
+edwards_φ_coefficients = [ay4, ay2z2, az4, by2, bz2, cy2, cz2, cyz]
 
 # Endomorphism, Montgomery model
 r_mg_XY = ws2mg_x(rX(x=mg2ws_x), mg2ws_y * sX(x=mg2ws_x), Z)
@@ -131,12 +133,12 @@ assert (x_φ_minus_one == α*X*(X+β)**2/(X+γ)**2)
 x_φ_minus_one_numerator_1_xz = FpXYZ(x_φ_minus_one_numerator_1)(x=X/Z)
 x_φ_minus_one_numerator_2_xz = FpXYZ(x_φ_minus_one_numerator_2)(x=X/Z)
 x_φ_minus_one_denominator_xz = FpXYZ(x_φ_minus_one_denominator)(x=X/Z)
-print("# Montgomery model endomorphism")
-print("α = {}".format(hex(α)))
-print("β = {}".format(hex(β)))
-print("γ = {}".format(hex(γ)))
-print()
-
+# print("# Montgomery model endomorphism")
+# print("α = {}".format(hex(α)))
+# print("β = {}".format(hex(β)))
+# print("γ = {}".format(hex(γ)))
+# print()
+montgomery_φ_coefficients = [α, β, γ]
 
 # EXAMPLE WITH A POINT
 # P and φ(P) in Weierstrass model
@@ -177,12 +179,8 @@ assert (y_ed_P * 1**2 * b_yz(y=y_ed_P, z=1) /
 λ = -8913659658109529928382530854484400854125314752504019737736543920008458395397
 [M1, M2] = Matrix([[-λ, 1], [r, 0]]).LLL()
 assert ((M1[0] + λ * M1[1]) % r == 0)
-# N1 = (r * Matrix([M1, M2])**-1)[0]
-print("# GLV parameters")
-print("m1 = {}".format(M1[0]))
-print("m2 = {}".format(M1[1]))
-print("m3 = {}".format(M2[0]))
-
-# print("M1 = [{}, {}]".format(M1[0], M1[1]))
-# print("M2 = [{}, {}]".format(M2[0], M2[1]))
-# print("N1 = [{}, {}]".format(N1[0], N1[1]))
+# print("# GLV parameters")
+# print("m1 = {}".format(M1[0]))
+# print("m2 = {}".format(M1[1]))
+# print("m3 = {}".format(M2[0]))
+glv_params = [M1[0], M1[1], M2[0]]

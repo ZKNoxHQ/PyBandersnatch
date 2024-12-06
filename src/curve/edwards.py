@@ -5,13 +5,15 @@ from gmpy2 import mpq, mpz, mod
 
 
 class Edwards:
-    def __init__(self, a, d, r, h):
+    def __init__(self, a, d, r, h, φ_coefficients, glv_params):
         self.field = a.field
         self.a = a
         self.d = d
         self.r = r
         self.h = h
         self.g = self.generator()
+        self.φ_coefficients = φ_coefficients
+        self.glv_params = glv_params
 
     def generator(self):
         """Generator with small x-coordinate."""
@@ -231,9 +233,7 @@ class Edwards:
             if k == 0 and l == 0:
                 return self.curve(0, 1, 1)
 
-            m1 = int(-113482231691339203864511368254957623327)
-            m2 = int(10741319382058138887739339959866629956)
-            m3 = int(21482638764116277775478679919733259912)
+            m1, m2, m3 = self.curve.glv_params
             b = [floor(mpq(k*m1, self.curve.r)),
                  floor(mpq(k*m2, self.curve.r))]
             k1 = k-b[0] * m1 - b[1] * m3
@@ -326,26 +326,21 @@ class Edwards:
                 return n_times_p == self.curve(0, 1, 1)
 
         def φ(self):
-            """Endomorphism sqrt(-2).
+            """Endomorphism sqrt(-2) (or Identity if large discriminant).
 
             TODO can be optimized with factorization of multi-variable polynomials.
             Obtained using `sage sage/φ.sage`.
 
             """
-            ay4 = 0x1d46e71b2d28e06c42bc1f5a41f4a0156d070863689e8862eb12927f72f308c3
-            ay2z2 = 0x20b21e58881722d68c92fa09709ea65d716e869843e94c821df033483694a51a
-            az4 = 0x1373fe65dcb354e5209f902de5b37008d6c2721d8d6d5fb556e8b7e969c053c9
-            by2 = 0x33937d60e9a0dd55ed1f9030e7c8b6fa9c42e1e41d2f1361a0fed9630f711cae
-            bz2 = 0x39a33e54438fe0155ae18e93205d4395acfe4be1127ca6458fc0270450b1b50d
-            cy2 = 0x2cdc91c2ed341d7901e6d6ece64cd98591c66ba64cdc7109d1bdd9cb6f93ee68
-            cz2 = 0x405a29f23ffc9ff2461a47d721d9210ab77ac21ee2cf489d5f01269bf08ee353
-
+            ay4, ay2z2, az4, by2, bz2, cy2, cz2, cyz = self.curve.φ_coefficients
             x = self.x
             y = self.y
             z = self.z
-            x_r = x * (ay4 * y**4 + ay2z2 * y**2 * z**2 + az4 * z**4)
+            x_r = x * (ay4 * y**4 + ay2z2 * y**2 * z **
+                       2 + az4 * z**4)
             y_r = y * z**2 * (by2 * y**2 + bz2 * z**2)
-            z_r = y * z**2 * (cy2 * y**2 + cz2 * z**2)
+            z_r = y * z**2 * (cy2 * y**2 + cz2 * z**2 +
+                              cyz * y*z)
             return self.curve(x_r, y_r, z_r)
 
         def glv(self, k):
@@ -356,12 +351,14 @@ class Edwards:
             https://www.iacr.org/archive/crypto2001/21390189.pdf
 
             """
+            k = k % self.curve.r
             if k == 0:
                 return self.curve(0, 1, 1)
+            m1, m2, m3 = self.curve.glv_params
+            m1 = int(m1)
+            m2 = int(m2)
+            m3 = int(m3)
 
-            m1 = int(-113482231691339203864511368254957623327)
-            m2 = int(10741319382058138887739339959866629956)
-            m3 = int(21482638764116277775478679919733259912)
             b = [floor(mpq(k*m1, self.curve.r)),
                  floor(mpq(k*m2, self.curve.r))]
             s0 = k-b[0] * m1 - b[1] * m3

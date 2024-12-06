@@ -11,7 +11,10 @@ clean:
 gen_test_vec:
 	sage sage/field.sage > tests/vectors/field.py
 	sage sage/montgomery.sage > tests/vectors/montgomery.py
-	sage sage/edwards.sage > tests/vectors/edwards.py
+	sed -i 's/ENDOMORPHISM = 1/ENDOMORPHISM = 0/g' sage/edwards.sage
+	sage sage/edwards.sage > tests/vectors/edwards-25519.py
+	sed -i 's/ENDOMORPHISM = 0/ENDOMORPHISM = 1/g' sage/edwards.sage
+	sage sage/edwards.sage > tests/vectors/edwards-bandersnatch.py
 	make clean
 
 test:

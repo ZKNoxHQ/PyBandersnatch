@@ -30,6 +30,7 @@ class TestEdwards25519(unittest.TestCase):
         self.assertTrue(test_vectors['k1_times_p'].in_curve())
         self.assertTrue(test_vectors['k2_times_p'].in_curve())
         self.assertTrue(test_vectors['k_times_p'].in_curve())
+        self.assertTrue(E.g.in_curve())
 
     def test_cofactor(self):
         """h*p is of order r"""

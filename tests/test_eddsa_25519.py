@@ -1,22 +1,16 @@
 # -*- coding: utf-8 -*-
 import unittest
-from src.curve.edwards25519 import Edwards25519
+from src.curve.edwards import Edwards
 from src.field import Field
 from src.primitives.eddsa import EdDSA
+from tests.test_edwards_25519 import TestEdwards25519
 
 
-class TestEdDSA(unittest.TestCase):
+class TestEdDSA25519(unittest.TestCase):
 
     def set_up_eddsa(self, secret=None):
-        F = Field(
-            0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed)
-        a = F(57896044618658097711785492504343953926634992332820282019728792003956564819944)
-        d = F(11790395817372903580333940030740964167805592400755249022757551653560006957928)
-        r = 7237005577332262213973186563042994240857116359379907606001950938285454250989
-        h = 8
-        E = Edwards25519(a, d, r, h)
-        eddsa = EdDSA(E, private_key=secret)
-        return eddsa
+        E, _ = TestEdwards25519.set_up_curve(TestEdwards25519)
+        return EdDSA(E, private_key=secret)
 
     def test_sign_verify(self):
         """Signature verification works"""

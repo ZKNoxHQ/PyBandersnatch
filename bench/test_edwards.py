@@ -11,7 +11,7 @@ class BenchEdwards(unittest.TestCase):
         Test vectors generated using `sage sage/edwards.sage > tests/vectors/edwards.py`.
 
         """
-        with open("tests/vectors/edwards.py", "r") as file:
+        with open("tests/vectors/edwards-bandersnatch.py", "r") as file:
             exec(file.read(), globals())
         return E, test_vectors  # type: ignore
 
