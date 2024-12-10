@@ -20,7 +20,7 @@ class xECDH:
 
     def generate_public_key(self):
         """Generates the public key using the generator."""
-        return self.private_key * self.curve.generator
+        return self.private_key * self.curve.g
 
     def compute_shared_secret(self, other_public_key):
         """Compute the shared secret `secret_key` * `other_public_key`."""

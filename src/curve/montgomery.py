@@ -15,14 +15,28 @@ def constant_time_swap(swap_flag, a, b):
 
 
 class Montgomery:
-    def __init__(self, a, b, r, h):
+    def __init__(self, a, b, r, h, φ_coefficients, glv_params):
         self.field = a.field
         self.a = a
         self.b = b
         self.r = r
         self.h = h
         self.a24 = (self.a+2)/4
-        self.generator = self.Point(self.field(0xa), 1, self)
+        self.φ_coefficients = φ_coefficients
+        self.glv_params = glv_params
+        self.g = self.generator()
+
+    def generator(self):
+        """Generator with small x-coordinate."""
+        x = 1
+        g = self(self.field(x), self.field(1))
+        # warning, B is non-square!
+        while (self.field(x)**3+self.a*self.field(x)**2+self.field(x)).is_square() or not (g.is_prime_order(self.r)):
+            x = -x
+            if x > 0:
+                x += 1
+            g = self(self.field(x), self.field(1))
+        return g
 
     def __repr__(self):
         return "Montgomery curve defined by {}*y^2 = x^3 + {}*x^2 + x".format(self.b, self.a)
@@ -244,7 +258,7 @@ class Montgomery:
             return self.naive_mul(N).z == 0 and self.z != 0
 
         def φ(self):
-            """Endomorphism sqrt(-2).
+            """Endomorphism sqrt(-2) or Identity.
 
             Reference:
             https://eprint.iacr.org/2021/1152.pdf page 6.
@@ -253,6 +267,10 @@ class Montgomery:
             x = self.x
             z = self.z
             c = self.curve.a+2  # TODO can be hard-coded
+            # ε = 1, ρ = 0 for bandernsatch
+            # ε = 0, ρ = 1 for Curve25519
+            # [ε, ρ] = self.curve.φ_coefficients[4:6]
+            # return self.curve((-(x-z)**2-c*x*z) * ε + ρ * 2*x*x, 2*x*z)
             return self.curve(-(x-z)**2-c*x*z, 2*x*z)
 
         def φ_minus_one(self):
@@ -261,12 +279,7 @@ class Montgomery:
             More information in the file `φ.sage`.
 
             """
-            α = self.curve.field(
-                13017314467421381532402061398313046228820690393386411611562176812113295071440)
-            β = self.curve.field(
-                14989411347484419666605643019079533103863186413725217032868654387860539633484)
-            γ = self.curve.field(
-                39953720565912266872856944794434720047230584117801669040511822283402326025498)
+            [α, β, γ] = self.curve.φ_coefficients[0:3]
             return self.curve(α * self.x * (self.x + self.z * β)**2, self.z * (self.x + γ * self.z)**2)
 
         def glv(self, k, constant_time=False):
@@ -280,10 +293,7 @@ class Montgomery:
             """
             if k == 0:
                 return self.curve(1, 0)
-            # sign difference with Edwards model
-            m1 = int(113482231691339203864511368254957623327)
-            m2 = int(10741319382058138887739339959866629956)
-            m3 = int(21482638764116277775478679919733259912)
+            [m1, m2, m3] = self.curve.glv_params
             b = [floor(mpq(k*m1, self.curve.r)),
                  floor(mpq(k*m2, self.curve.r))]
             k1 = k-b[0] * m1 - b[1] * m3
@@ -293,10 +303,10 @@ class Montgomery:
         def __rmul__(self, k, constant_time=False):
             """Scalar multiplication with the scalar give first.
 
-            Computed using GLV.
+            Computed using GLV. In Montgomery model, points are seen modulo the sign, so k is replaced by abs(k).
 
             """
-            return self.glv(k, constant_time=constant_time)
+            return self.glv(abs(k), constant_time=constant_time)
 
         # def slow_add(self, q):
         #     """Compute the addition `self` ± `q`.

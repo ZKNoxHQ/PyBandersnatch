@@ -5,7 +5,7 @@ import unittest
 from random import randint
 
 
-class TestMontgomery(unittest.TestCase):
+class TestMontgomeryBandersnatch(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
@@ -14,7 +14,7 @@ class TestMontgomery(unittest.TestCase):
 
         """
         try:
-            with open('tests/vectors/montgomery.py', "r") as file:
+            with open('tests/vectors/montgomery-bandersnatch.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
@@ -47,8 +47,11 @@ class TestMontgomery(unittest.TestCase):
     def test_φ_eigenvalue(self):
         """φ=[λ] on the <p> eigen-space"""
         E, test_vectors = self.set_up_curve()
-        self.assertEqual(test_vectors['p'].φ(),
-                         test_vectors['λ']*test_vectors['p'])
+        λ = test_vectors['λ']
+        p = test_vectors['p']
+        λ_p = p.naive_mul(λ)
+        φ_p = p.φ()
+        self.assertEqual(φ_p, λ_p)
 
     def test_φ(self):
         """φ from test vectors"""
@@ -143,10 +146,12 @@ class TestMontgomery(unittest.TestCase):
         # Small x generator
         x = 1
         while (x**3 + E.a*x**2 + x).is_square() or not (E(E.field(x), 1).is_prime_order(E.r)):  # B is non square!
-            x += 1
+            x *= -1
+            if x > 0:
+                x += 1
         g = E(E.field(x), 1)
         self.assertTrue(g.is_prime_order(E.r))
-        self.assertEqual(g, E.generator)
+        self.assertEqual(g, E.g)
 
     # def test_slow_add(self):
     #     E, test_vectors = self.set_up_curve()
