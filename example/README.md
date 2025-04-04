@@ -1,6 +1,6 @@
 ## Combining GLV and FakeGLV
 We provide in `glv_fakeglv.py` a demonstration of a fast scalar multiplication computed using GLV and FakeGLV as presented in [this blogpost](https://ethresear.ch/t/fake-glv-you-dont-need-an-efficient-endomorphism-to-implement-glv-like-scalar-multiplication-in-snark-circuits/20394). 
-While the computation is done in Python, it is aimed to be adapted for circuit integration.
+While the computation is done in Python, it is aimed to be adapted for circuit integration. This example is conducted with Bandersnatch, but can be applied to any curve having a fast endomorphism (a-la-GLV), for example BLS12-381, BN254, or the Bitcoin's curve (depending on the context where an in-circuit verification is needed).
 
 ### How to use
 ```bash
@@ -36,7 +36,7 @@ We obtain a 44% improvement as expected from the theory: MSM(4,64) vs MSM(2,128)
 ### Test of 2MSM using GLV and FakeGLV
 The code also provides a decomposition of
 
-$$[k]P+[l]Q = \iff [u_1]P + [u_2] \phi(P) + [v_1]Q + [v_2]\phi(Q) - [w_1]R -[w_2]\phi(R) = 0$$
+$$[k]P+[l]Q = R \iff [u_1]P + [u_2] \phi(P) + [v_1]Q + [v_2]\phi(Q) - [w_1]R -[w_2]\phi(R) = 0$$
 ```
 Simultaneous decomposition of k and l:
 k = 12345623456765432345676543234567876543456765434567865433456765433456765433456 (253 bits)
