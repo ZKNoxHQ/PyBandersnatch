@@ -1,6 +1,6 @@
 ## Combining GLV and FakeGLV
-We provide in `glv_fakeglv.py` a demonstration of a fast scalar multiplication computed using GLV and FakeGLV. 
-While the computations are done in Python, it is aimed to be adapted for circuit integration.
+We provide in `glv_fakeglv.py` a demonstration of a fast scalar multiplication computed using GLV and FakeGLV as presented in [this blogpost](https://ethresear.ch/t/fake-glv-you-dont-need-an-efficient-endomorphism-to-implement-glv-like-scalar-multiplication-in-snark-circuits/20394). 
+While the computation is done in Python, it is aimed to be adapted for circuit integration.
 
 ### How to use
 ```bash
@@ -20,7 +20,7 @@ v2 = -9814722368297079247 (64 bits)
 We provide an implementation that is not SageMath-dependent. Our implementation of LLL is very slow compared with SageMath (that wraps a C implementation), but in a ZK context, this computation is part of the witness and not computed in-circuit.
 
 ### Test of 4MSM
-We verify that $[u_1]P + [u_2]φ(P) - [v_1]Q - [v_2]φ(Q) = 0$:
+We verify that $[u_1]P + [u_2]\phi(P) - [v_1]Q - [v_2]\phi(Q) = 0$:
 ```
 TEST of [u1]P + [u2]φ(P) - [v1]Q - [v2]φ(Q) == 0?		OK
 ```
@@ -36,7 +36,7 @@ We obtain a 44% improvement as expected from the theory: MSM(4,64) vs MSM(2,128)
 ### Test of 2MSM using GLV and FakeGLV
 The code also provides a decomposition of
 
-$$[k]P+[l]Q =R$ \iff [u_1]P + [u_2] φ(P) + [v_1]Q + [v_2]φ(Q) - [w_1]R -[w_2]φ(R) = 0$$
+$$[k]P+[l]Q =R$ \iff [u_1]P + [u_2] \phi(P) + [v_1]Q + [v_2]\phi(Q) - [w_1]R -[w_2]\phi(R) = 0$$
 ```
 Simultaneous decomposition of k and l:
 k = 12345623456765432345676543234567876543456765434567865433456765433456765433456 (253 bits)
