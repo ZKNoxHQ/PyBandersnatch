@@ -5,7 +5,7 @@ While the computations are done in Python, it is aimed to be adapted for circuit
 ### How to use
 ```bash
 cd ..
-python -m example.glv_fakeglv --k 12345623456765432345676543234567876543456765434567865433456765433456765433456 
+python -m example.glv_fakeglv --k 12345623456765432345676543234567876543456765434567865433456765433456765433456 --l 13456384938498474896734986734986734986739863749863746020720946720694720496702
 ```
 ### Scalar decomposition
 This computes an example of scalar decomposition in dimension 4 for a random scalar $k$:
@@ -32,3 +32,19 @@ GLV+FakeGLV:	2.40 ms per iteration (44% faster).
 
 ```
 We obtain a 44% improvement as expected from the theory: MSM(4,64) vs MSM(2,128).
+
+### Test of 2MSM using GLV and FakeGLV
+The code also provides a decomposition of
+$$[k]P+[l]Q =R$ \iff [u_1]P + [u_2] φ(P) + [v_1]Q + [v_2]φ(Q) - [w_1]R -[w_2]φ(R) = 0$$
+```
+Simultaneous decomposition of k and l:
+k = 12345623456765432345676543234567876543456765434567865433456765433456765433456 (253 bits)
+l = 347416144716927276873051607940243527430707856423175768934543413965032823901 (253 bits)
+u1 = -8727058181421248280755369 (83 bits)
+u2 = 598448052775363456475082 (79 bits)
+v1 = 3688021787012064781328580 (82 bits)
+v2 = 12046754130873887373428165 (84 bits)
+w1 = -5038805389123913550157142 (83 bits)
+w2 = 1209496161631686713732247 (81 bits)
+```
+This simultaneous decomposition is done using a lattice of dimension 5. We did not investigate further the implementation using a 6MSM yet, but we expect having a slight improvement: MSM(6, 85) vs MSM(4, 128).

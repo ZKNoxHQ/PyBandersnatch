@@ -110,22 +110,3 @@ def slow_reduction(basis: Sequence[Sequence[int]], delta: float) -> Sequence[Seq
             k = max(k - 1, 1)
 
     return [list(map(int, b)) for b in basis]
-
-
-# # Example: 4x4 lattice basis
-# r = 13108968793781547619861935127046491459309155893440570251786403306729687672801
-# λ = 8913659658109529928382530854484400854125314752504019737736543920008458395397
-# k = 8902345678987654656459830496853406734986743986743067034867803467430867034867
-# basis = [
-#     [r, 0, 0, 0],
-#     # [0, r, 0, 0],
-#     # [0, 0, r, 0],
-#     # [0, 0, 0, r],
-#     [-λ, 1, 0, 0],
-#     [0, 0, -λ, 1],
-#     [k, 0, 1, 0],
-# ]
-
-# reduced_basis = reduction(basis, 0.75)
-# print("Reduced Basis:")
-# print(reduced_basis)

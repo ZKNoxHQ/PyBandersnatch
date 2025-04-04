@@ -9,8 +9,8 @@ import argparse
 
 def splitGLVFakeGLV(k, λ, r, δ):
     """
-    Decompose k = u_1 + λ u_2 - v_1 k - v_2 k λ using LLL with parameter δ
-    Expected size |u_i| ≃ (r/α³)^(1/4)
+    Decompose k = (u_1 + λ u_2) / (v_1 + v_2 λ) mod r using LLL with parameter δ
+    Expected size |u_i|, |v_i| ≃ (r/α³)^(1/4)
     """
 
     basis = [
@@ -23,13 +23,35 @@ def splitGLVFakeGLV(k, λ, r, δ):
     return M[0]
 
 
+def split2MSMGLVFakeGLV(k, l, λ, r, δ):
+    """
+    Decompose k = (u_1 + λ u_2) / (w_1 + λ w_2)
+              l = (v_1 + λ v_2) / (w_1 + λ w_2)
+    simultaneously using LLL with parameter δ
+    Expected size |u_i|, |v_i|, |w_i| ≃ (r²λ/α⁴)**(1/5) ? Can be reduced ?
+    """
+
+    basis = [
+        [r, 0, 0, 0, 0, 0],
+        [0, 0, r, 0, 0, 0],
+        [k, 0, l, 0, 1, 0],
+        [-λ, 1, 0, 0, 0, 0],
+        [0, 0, -λ, 1, 0, 0],
+        [0, 0, 0, 0, -λ, 1],
+    ]
+    M = slow_reduction(basis, δ)
+    return M[0]
+
+
 def cli():
     parser = argparse.ArgumentParser(
         description="Demonstration of GLV+FakeGLV")
     # parser.add_argument("action", choices=[
-    #                     "genkeys", "sign", "sign_tx", "verify", "verifyonchain", "verifyonchainsend"], help="Action to perform")
+    #                     "glv_fakeglv", "2msm_glv_fakeglv", "test_glv_fakeglv",], help="Action to perform")
     parser.add_argument("--k", type=int,
                         help="Provide a scalar to perform the scalar multiplication")
+    parser.add_argument("--l", type=int,
+                        help="Provide a second scalar to perform the multi scalar multiplication")
 
     args = parser.parse_args()
 
@@ -44,7 +66,6 @@ def cli():
     r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
     h = 4
     E = Edwards(a, d, r, h)
-    r = 13108968793781547619861935127046491459309155893440570251786403306729687672801
     λ = -8913659658109529928382530854484400854125314752504019737736543920008458395397
 
     # Verification of [k] P = Q
@@ -98,6 +119,22 @@ def cli():
     time_glv_fakeglv = (time()-t)/niter
     print("{:.2f} ms per iteration ({:.0f}% faster).".format(
         time_glv_fakeglv*1000, (time_glv - time_glv_fakeglv) / time_glv * 100))
+
+    if args.l:
+
+        # compute a 2MSM decomposition
+        l = (args.l) % r
+        (u1, u2, v1, v2, w1, w2) = split2MSMGLVFakeGLV(k, l, λ, r, δ)
+
+        print("Simultaneous decomposition of k and l:")
+        print("k = {} ({} bits)".format(k, len(bin(k))-2))
+        print("l = {} ({} bits)".format(l, len(bin(k))-2))
+        print("u1 = {} ({} bits)".format(u1, len(bin(abs(u1)))-2))
+        print("u2 = {} ({} bits)".format(u2, len(bin(abs(u2)))-2))
+        print("v1 = {} ({} bits)".format(v1, len(bin(abs(v1)))-2))
+        print("v2 = {} ({} bits)".format(v2, len(bin(abs(v2)))-2))
+        print("w1 = {} ({} bits)".format(w1, len(bin(abs(w1)))-2))
+        print("w2 = {} ({} bits)".format(w2, len(bin(abs(w2)))-2))
 
 
 cli()
