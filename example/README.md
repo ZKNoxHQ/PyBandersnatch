@@ -48,4 +48,4 @@ v2 = 12046754130873887373428165 (84 bits)
 w1 = -5038805389123913550157142 (83 bits)
 w2 = 1209496161631686713732247 (81 bits)
 ```
-This simultaneous decomposition is done using a lattice of dimension 5. We did not investigate further the implementation using a 6MSM yet, but we expect having a slight improvement of around 9% (MSM(6, 86) vs MSM(4, 128)).
+This simultaneous decomposition is done using a lattice of dimension 6. We did not investigate further the implementation using a 6MSM yet, but we expect having a slight improvement of around 9% (MSM(6, 86) vs MSM(4, 128)).
