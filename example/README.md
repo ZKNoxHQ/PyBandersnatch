@@ -36,7 +36,7 @@ We obtain a 44% improvement as expected from the theory: MSM(4,64) vs MSM(2,128)
 ### Test of 2MSM using GLV and FakeGLV
 The code also provides a decomposition of
 
-$$[k]P+[l]Q =R$ \iff [u_1]P + [u_2] \phi(P) + [v_1]Q + [v_2]\phi(Q) - [w_1]R -[w_2]\phi(R) = 0$$
+$$[k]P+[l]Q = \iff [u_1]P + [u_2] \phi(P) + [v_1]Q + [v_2]\phi(Q) - [w_1]R -[w_2]\phi(R) = 0$$
 ```
 Simultaneous decomposition of k and l:
 k = 12345623456765432345676543234567876543456765434567865433456765433456765433456 (253 bits)
