@@ -35,6 +35,7 @@ We obtain a 44% improvement as expected from the theory: MSM(4,64) vs MSM(2,128)
 
 ### Test of 2MSM using GLV and FakeGLV
 The code also provides a decomposition of
+
 $$[k]P+[l]Q =R$ \iff [u_1]P + [u_2] φ(P) + [v_1]Q + [v_2]φ(Q) - [w_1]R -[w_2]φ(R) = 0$$
 ```
 Simultaneous decomposition of k and l:
