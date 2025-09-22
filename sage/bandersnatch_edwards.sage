@@ -99,7 +99,7 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
-print("# File generated using `sage sage/edwards.sage > tests/vectors/edwards.py`.")
+print("# File generated using `sage sage/bandersnatch_edwards.sage > tests/vectors/bandersnatch_edwards.py`.")
 print("from src.field import Field")
 print("from src.curve.edwards import Edwards")
 print("F = Field({})".format(hex(Fp.characteristic())))

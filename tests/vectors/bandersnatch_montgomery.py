@@ -1,4 +1,4 @@
-# File generated using `sage sage/montgomery.sage > tests/vectors/montgomery.py`.
+# File generated using `sage sage/bandersnatch_montgomery.sage > tests/vectors/bandersnatch_montgomery.py`.
 from src.field import Field
 from src.curve.montgomery import Montgomery
 F = Field(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)

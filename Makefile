@@ -11,9 +11,12 @@ clean:
 	find . -type d -name '__pycache__' -exec rm -rf {} +
 
 gen_test_vec:
+	# test vectors for Bandersnatch 
 	sage sage/bandersnatch_field.sage > tests/vectors/bandersnatch_field.py
 	sage sage/bandersnatch_montgomery.sage > tests/vectors/bandersnatch_montgomery.py
 	sage sage/bandersnatch_edwards.sage > tests/vectors/bandersnatch_edwards.py
+	# test vectors for Ed25519
+	sage sage/ed25519_field.sage > tests/vectors/ed25519_field.py
 	make clean
 
 test:

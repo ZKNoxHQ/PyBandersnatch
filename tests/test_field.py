@@ -1,61 +1,119 @@
-# -*- coding: utf-8 -*-
-from src.field import Field
+# # -*- coding: utf-8 -*-
+# from src.field import Field
+# import unittest
+
+
+# class TestField(unittest.TestCase):
+
+#     def set_up_field(self):
+#         """Create Bandersnatch base field.
+
+#         Test vectors generated using the file `sage/bandersnatch_field.sage`.
+
+#         """
+#         try:
+#             with open('tests/vectors/bandersnatch_field.py', "r") as file:
+#                 exec(file.read(), globals())
+#         except FileNotFoundError as e:
+#             raise unittest.SkipTest(
+#                 "The file 'tests/bandersnatch_field.py' was not found. Please generate it using `sage sage/bandersnatch_field.sage > tests/bandersnatch_field.py`.")
+#         return F, test_vectors  # type: ignore
+
+#     def test_random(self):
+#         """Two random elements are different.
+
+#         It happens with probability 1/`p`, small for large `p`."""
+#         F, test_vectors = self.set_up_field()
+#         a = F.random()
+#         b = F.random()
+#         self.assertFalse(a == b)
+
+#     def test_mul(self):
+#         """a*b from test vectors"""
+#         F, test_vectors = self.set_up_field()
+#         a = test_vectors['a']
+#         b = test_vectors['b']
+#         a_mul_b = a*b
+#         self.assertEqual(a_mul_b, test_vectors['a_mul_b'])
+
+#     def test_div(self):
+#         """a/b from test vectors"""
+#         F, test_vectors = self.set_up_field()
+#         a = test_vectors['a']
+#         b = test_vectors['b']
+#         a_div_b = a/b
+#         self.assertEqual(a_div_b, test_vectors['a_div_b'])
+
+#     def test_sqrt(self):
+#         """Square root test using a square"""
+#         F, test_vectors = self.set_up_field()
+#         sq = test_vectors['b']
+#         root = sq.sqrt()
+#         self.assertEqual(root*root, sq)
+#         self.assertTrue(
+#             root == test_vectors['sqrt_b'] or root == -test_vectors['sqrt_b'])
+
+#     def test_is_square(self):
+#         """Legendre symbol test on small squares and a non-square"""
+#         F, test_vectors = self.set_up_field()
+#         self.assertFalse(test_vectors['non_square'].is_square())
+#         for i in range(F.non_square.value):
+#             self.assertTrue(F(i).is_square())
+
+
+# tests/test_field.py
 import unittest
+import os
 
 
-class TestField(unittest.TestCase):
+class FieldTestBase(unittest.TestCase):
+    __test__ = False
+    VECTOR_FILE = None  # to be set in subclasses
 
     def set_up_field(self):
-        """Create Bandersnatch base field.
-
-        Test vectors generated using the file `sage/bandersnatch_field.sage`.
-
-        """
+        path = os.path.join("tests/vectors/", self.VECTOR_FILE)
         try:
-            with open('tests/vectors/bandersnatch_field.py', "r") as file:
+            with open(path, "r") as file:
                 exec(file.read(), globals())
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             raise unittest.SkipTest(
-                "The file 'tests/bandersnatch_field.py' was not found. Please generate it using `sage sage/bandersnatch_field.sage > tests/bandersnatch_field.py`.")
+                f"File '{path}' not found. Please generate it with Sage."
+            )
         return F, test_vectors  # type: ignore
 
     def test_random(self):
-        """Two random elements are different.
-
-        It happens with probability 1/`p`, small for large `p`."""
-        F, test_vectors = self.set_up_field()
-        a = F.random()
-        b = F.random()
-        self.assertFalse(a == b)
+        F, _ = self.set_up_field()
+        a, b = F.random(), F.random()
+        self.assertNotEqual(a, b)
 
     def test_mul(self):
-        """a*b from test vectors"""
-        F, test_vectors = self.set_up_field()
-        a = test_vectors['a']
-        b = test_vectors['b']
-        a_mul_b = a*b
-        self.assertEqual(a_mul_b, test_vectors['a_mul_b'])
+        F, tv = self.set_up_field()
+        self.assertEqual(tv['a'] * tv['b'], tv['a_mul_b'])
 
     def test_div(self):
-        """a/b from test vectors"""
-        F, test_vectors = self.set_up_field()
-        a = test_vectors['a']
-        b = test_vectors['b']
-        a_div_b = a/b
-        self.assertEqual(a_div_b, test_vectors['a_div_b'])
+        F, tv = self.set_up_field()
+        self.assertEqual(tv['a'] / tv['b'], tv['a_div_b'])
 
     def test_sqrt(self):
-        """Square root test using a square"""
-        F, test_vectors = self.set_up_field()
-        sq = test_vectors['b']
+        F, tv = self.set_up_field()
+        sq = tv['b']
         root = sq.sqrt()
-        self.assertEqual(root*root, sq)
-        self.assertTrue(
-            root == test_vectors['sqrt_b'] or root == -test_vectors['sqrt_b'])
+        self.assertEqual(root * root, sq)
+        self.assertTrue(root == tv['sqrt_b'] or root == -tv['sqrt_b'])
 
     def test_is_square(self):
-        """Legendre symbol test on small squares and a non-square"""
-        F, test_vectors = self.set_up_field()
-        self.assertFalse(test_vectors['non_square'].is_square())
+        F, tv = self.set_up_field()
+        self.assertFalse(tv['non_square'].is_square())
         for i in range(F.non_square.value):
             self.assertTrue(F(i).is_square())
+
+
+# Concrete subclasses
+class TestBandersnatchField(FieldTestBase):
+    __test__ = True
+    VECTOR_FILE = "bandersnatch_field.py"
+
+
+class TestEd25519Field(FieldTestBase):
+    __test__ = True
+    VECTOR_FILE = "ed25519_field.py"

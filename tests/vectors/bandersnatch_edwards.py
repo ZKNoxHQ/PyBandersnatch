@@ -1,4 +1,4 @@
-# File generated using `sage sage/edwards.sage > tests/vectors/edwards.py`.
+# File generated using `sage sage/bandersnatch_edwards.sage > tests/vectors/bandersnatch_edwards.py`.
 from src.field import Field
 from src.curve.edwards import Edwards
 F = Field(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)

@@ -63,7 +63,7 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
-print("# File generated using `sage sage/montgomery.sage > tests/vectors/montgomery.py`.")
+print("# File generated using `sage sage/bandersnatch_montgomery.sage > tests/vectors/bandersnatch_montgomery.py`.")
 print("from src.field import Field")
 print("from src.curve.montgomery import Montgomery")
 print("F = Field(0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001)")
