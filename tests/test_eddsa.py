@@ -14,13 +14,13 @@ class TestEdDSA(unittest.TestCase):
         d = F(45022363124591815672509500913686876175488063829319466900776701791074614335719)
         r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
         h = 4
-        E = Edwards(a, d, r, h)
+        E = Edwards(a, d, r, h, glv=True)
         eddsa = EdDSA(E, private_key=secret)
         return eddsa
 
     def test_sign_verify(self):
         """Signature verification works"""
-        alice = self.set_up_eddsa(secret=b"Que boludo... my llave es fija!!")
+        alice = self.set_up_eddsa(secret=b"Que boludo... my llave se fijo!!")
         sig_1 = alice.sign("Buenas che")
         assert alice.verify("Buenas che", sig_1)
 

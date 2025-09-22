@@ -6,7 +6,7 @@ a = F(0x4247698f4e32ad45a293959b4ca17afa4a2d2317e4c6ce5023e1fd63d1b5de98)
 b = F(5)
 r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
 h = 4
-E = Montgomery(a, b, r, h)
+E = Montgomery(a, b, r, h, glv=True)
 test_vectors = {}
 test_vectors['p'] = E(F(0x3d65d0dd26c89b6c1e111a4b7d4875a8fc60cc1a2191beba4f6c11f2fb1c2cbf), 1)
 test_vectors['q'] = E(F(0x4f9ace66d99bf333dd1eb464c902fcc9217372d8902583ff2e65fb3df88fdbb8), 1)

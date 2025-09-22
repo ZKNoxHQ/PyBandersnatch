@@ -5,7 +5,7 @@ from gmpy2 import mpq, mpz, mod
 
 
 class Edwards:
-    def __init__(self, a, d, r, h):
+    def __init__(self, a, d, r, h, glv=False):
         self.field = a.field
         self.a = a
         self.d = d
@@ -13,6 +13,7 @@ class Edwards:
         self.h = h
         self.generator = self.Point(self.field(3), self.field(
             0x2d418cc584d9c9df8750a436fac98068949d14c7bdce4034fe792e4c14e30a3f), self.field(1), self)
+        self.glv = glv
 
     def __repr__(self):
         return "Edwards curve defined by {}*x^2 + y^2 = 1 + {} * x^2*y^2".format(self.a, self.d)
@@ -26,7 +27,10 @@ class Edwards:
             y = self.field(y)
         if isinstance(z, int) or isinstance(z, mpz):
             z = self.field(z)
-        return self.Point(x, y, z, self)
+        if self.glv:
+            return self.GLVPoint(x, y, z, self)
+        else:
+            return self.Point(x, y, z, self)
 
     def random(self):
         """Returns a random point of `self`."""
@@ -212,25 +216,51 @@ class Edwards:
                 k &= ~(1 << n)
             return res
 
-        def multi_scalar_mul_2(self, k, q, l):
-            """Compute k*self + l*q using GLV trick. It is a four-dimensional scalar multiplication."""
-            if k == 0 and l == 0:
+        def __rmul__(self, k):
+            """Scalar multiplication with the scalar give first.
+
+            """
+            return self.naive_mul(k)
+
+        def multi_scalar_mul_2(self, k1, q, k2):
+            """Multi scalar multiplication `k1` * `self` + `k2` * `q`.
+
+            From most significant bit (MSB) to least significant bit (LSB)
+            TODO not constant time.
+
+            """
+            s0, s1, p0, p1 = k1, k2, self, q
+
+            p0 = p0.neg() if int(s0) < 0 else p0
+            p1 = p1.neg() if int(s1) < 0 else p1
+            s0 = abs(int(s0))
+            s1 = abs(int(s1))
+
+            if s0 == 0 and s1 == 0:
                 return self.curve(0, 1, 1)
 
-            m1 = int(-113482231691339203864511368254957623327)
-            m2 = int(10741319382058138887739339959866629956)
-            m3 = int(21482638764116277775478679919733259912)
-            b = [floor(mpq(k*m1, self.curve.r)),
-                 floor(mpq(k*m2, self.curve.r))]
-            k1 = k-b[0] * m1 - b[1] * m3
-            k2 = -b[0] * m2 - b[1] * -m1
+            if s1 > s0:
+                s0, p0, s1, p1 = s1, p1, s0, p0
+            # s1 ≤ s0
 
-            b = [floor(mpq(l*m1, self.curve.r)),
-                 floor(mpq(l*m2, self.curve.r))]
-            l1 = l-b[0] * m1 - b[1] * m3
-            l2 = -b[0] * m2 - b[1] * -m1
-
-            return self.multi_scalar_mul_4(k1, self.φ(), k2, q, l1, q.φ(), l2)
+            res = self.curve(0, 1, 1)
+            prec = [
+                [None, None], [None, None]
+            ]
+            prec[0][0] = res
+            prec[0][1] = p1
+            prec[1][0] = p0
+            prec[1][1] = p0 + p1
+            s0 = int(s0)
+            s1 = int(s1)
+            n = s0.bit_length()
+            while n > 0:
+                res = res.dbl()
+                n -= 1
+                res += prec[(s0 >> n) & 1][(s1 >> n) & 1]
+                s0 &= ~(1 << n)
+                s1 &= ~(1 << n)
+            return res
 
         def multi_scalar_mul_4(self, k1, q, k2, r, k3, s, k4):
             """Multi scalar multiplication `k1` * `self` + `k2` * `q` + `k3` * `r` + `k4` * `s`.
@@ -311,6 +341,20 @@ class Edwards:
             else:
                 return n_times_p == self.curve(0, 1, 1)
 
+        def encode_base(self, b):
+            """Decoding following the formate of RFC 8032.
+
+            Reference: https://datatracker.ietf.org/doc/html/rfc8032
+
+            """
+            xp, yp = self.x/self.z, self.y/self.z
+            p = self.curve.field.p
+            s = bytearray(int(yp.value % p).to_bytes(b//8, byteorder='little'))
+            if (xp.value % p) % 2 != 0:
+                s[(b-1)//8] |= 1 << (b-1) % 8
+            return s
+
+    class GLVPoint(Point):
         def φ(self):
             """Endomorphism sqrt(-2).
 
@@ -389,15 +433,22 @@ class Edwards:
             """
             return self.glv(k)
 
-        def encode_base(self, b):
-            """Decoding following the formate of RFC 8032.
+        def multi_scalar_mul_2(self, k, q, l):
+            """Compute k*self + l*q using GLV trick. It is a four-dimensional scalar multiplication."""
+            if k == 0 and l == 0:
+                return self.curve(0, 1, 1)
 
-            Reference: https://datatracker.ietf.org/doc/html/rfc8032
+            m1 = int(-113482231691339203864511368254957623327)
+            m2 = int(10741319382058138887739339959866629956)
+            m3 = int(21482638764116277775478679919733259912)
+            b = [floor(mpq(k*m1, self.curve.r)),
+                 floor(mpq(k*m2, self.curve.r))]
+            k1 = k-b[0] * m1 - b[1] * m3
+            k2 = -b[0] * m2 - b[1] * -m1
 
-            """
-            xp, yp = self.x/self.z, self.y/self.z
-            p = self.curve.field.p
-            s = bytearray(int(yp.value % p).to_bytes(b//8, byteorder='little'))
-            if (xp.value % p) % 2 != 0:
-                s[(b-1)//8] |= 1 << (b-1) % 8
-            return s
+            b = [floor(mpq(l*m1, self.curve.r)),
+                 floor(mpq(l*m2, self.curve.r))]
+            l1 = l-b[0] * m1 - b[1] * m3
+            l2 = -b[0] * m2 - b[1] * -m1
+
+            return self.multi_scalar_mul_4(k1, self.φ(), k2, q, l1, q.φ(), l2)

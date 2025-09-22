@@ -14,7 +14,7 @@ class TestKeyExchange(unittest.TestCase):
         b = F(5)
         r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1
         h = 4
-        E = Montgomery(a, b, r, h)
+        E = Montgomery(a, b, r, h, glv=True)
         key_exchange = xECDH(E, secret)
         return key_exchange
 

@@ -1,8 +1,10 @@
 .SILENT: clean test benchmark
 MAKEFLAGS += --no-print-directory
+PY = myenv/bin/python
 
 install:
-	pip install -r requirements.txt
+	python -m venv myenv
+	myenv/bin/pip install -r requirements.txt
 
 clean:
 	find . -type f -name '*.sage.py' -exec rm -f {} +
@@ -16,16 +18,16 @@ gen_test_vec:
 
 test:
 	@if [ -z "$(TEST)" ]; then \
-		python -m unittest discover -s tests; \
+		$(PY) -m unittest discover -s tests; \
 	else \
-		python -m unittest tests.$(TEST); \
+		$(PY) -m unittest tests.$(TEST); \
 	fi
 	make clean
 
 benchmark:
 	@if [ -z "$(BENCH)" ]; then \
-		python -m unittest discover -s bench -q; \
+		$(PY) -m unittest discover -s bench -q; \
 	else \
-		python -m unittest bench.$(BENCH) -q; \
+		$(PY) -m unittest bench.$(BENCH) -q; \
 	fi
 	make clean

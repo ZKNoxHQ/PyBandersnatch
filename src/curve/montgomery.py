@@ -15,14 +15,15 @@ def constant_time_swap(swap_flag, a, b):
 
 
 class Montgomery:
-    def __init__(self, a, b, r, h):
+    def __init__(self, a, b, r, h, glv=False):
         self.field = a.field
         self.a = a
         self.b = b
         self.r = r
         self.h = h
         self.a24 = (self.a+2)/4
-        self.generator = self.Point(self.field(0xa), 1, self)
+        self.generator = self.Point(self.field(0xa), self.field(1), self)
+        self.glv = glv
 
     def __repr__(self):
         return "Montgomery curve defined by {}*y^2 = x^3 + {}*x^2 + x".format(self.b, self.a)
@@ -34,7 +35,10 @@ class Montgomery:
             x = self.field(x)
         if isinstance(z, int) or isinstance(z, mpz):
             z = self.field(z)
-        return self.Point(x, z, self)
+        if self.glv:
+            return self.GLVPoint(x, z, self)
+        else:
+            return self.Point(x, z, self)
 
     def random(self):
         """Returns a random point of `self`."""
@@ -82,7 +86,7 @@ class Montgomery:
             """Affine representation of the projective point."""
             if self.z == 0:
                 return self.curve(1, 0)
-            return self.curve(self.x/self.z, 1)
+            return self.curve(self.x/self.z, self.curve.field(1))
 
         def in_curve(self, twist=False):
             """Returns the curve membership boolean."""
@@ -194,6 +198,13 @@ class Montgomery:
                 return self.curve(1, 0)
             return r0
 
+        def __rmul__(self, k, constant_time=False):
+            """Scalar multiplication with the scalar give first.
+
+            TODO: constant time check?
+            """
+            return self.naive_mul(k)
+
         def multi_scalar_mul(self, k1, other, k2, other_minus_self, constant_time=False):
             """Multi scalar multiplication `k1` * `self` + `k2` * `other`.
 
@@ -242,6 +253,27 @@ class Montgomery:
         def is_prime_order(self, N):
             """Returns the boolean corresponding to `self.order() == N`."""
             return self.naive_mul(N).z == 0 and self.z != 0
+
+        # def slow_add(self, q):
+        #     """Compute the addition `self` ± `q`.
+
+        #     It is not a differential addition, but requires the computation of the y-coordinates with sqrt.
+        #     TODO optimized.
+        #     Reference:
+        #     https://www.iacr.org/archive/eurocrypt2014/84410275/84410275.pdf page 8.
+
+        #     """
+        #     x_p = self.x/self.z
+        #     x_q = q.x/q.z
+        #     a = self.curve.a
+        #     b = self.curve.b
+
+        #     y_p = ((x_p**3 + a*x_p**2 + x_p)/b).sqrt()
+        #     y_q = ((x_q**3 + a*x_q**2 + x_q)/b).sqrt()
+
+        #     return self.curve(b * (x_q * y_p - x_p*y_q)**2 / (x_p*x_q*(x_p-x_q)**2), 1)
+
+    class GLVPoint(Point):
 
         def φ(self):
             """Endomorphism sqrt(-2).
@@ -297,22 +329,3 @@ class Montgomery:
 
             """
             return self.glv(k, constant_time=constant_time)
-
-        # def slow_add(self, q):
-        #     """Compute the addition `self` ± `q`.
-
-        #     It is not a differential addition, but requires the computation of the y-coordinates with sqrt.
-        #     TODO optimized.
-        #     Reference:
-        #     https://www.iacr.org/archive/eurocrypt2014/84410275/84410275.pdf page 8.
-
-        #     """
-        #     x_p = self.x/self.z
-        #     x_q = q.x/q.z
-        #     a = self.curve.a
-        #     b = self.curve.b
-
-        #     y_p = ((x_p**3 + a*x_p**2 + x_p)/b).sqrt()
-        #     y_q = ((x_q**3 + a*x_q**2 + x_q)/b).sqrt()
-
-        #     return self.curve(b * (x_q * y_p - x_p*y_q)**2 / (x_p*x_q*(x_p-x_q)**2), 1)
