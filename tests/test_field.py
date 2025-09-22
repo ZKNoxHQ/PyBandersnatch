@@ -8,15 +8,15 @@ class TestField(unittest.TestCase):
     def set_up_field(self):
         """Create Bandersnatch base field.
 
-        Test vectors generated using the file `field_test_vectors.sage`.
+        Test vectors generated using the file `sage/bandersnatch_field.sage`.
 
         """
         try:
-            with open('tests/vectors/field.py', "r") as file:
+            with open('tests/vectors/bandersnatch_field.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
-                "The file 'field_test_vectors.py' was not found. Please generate it using `sage field_test_vectors.sage > field_test_vectors.py`.")
+                "The file 'tests/bandersnatch_field.py' was not found. Please generate it using `sage sage/bandersnatch_field.sage > tests/bandersnatch_field.py`.")
         return F, test_vectors  # type: ignore
 
     def test_random(self):

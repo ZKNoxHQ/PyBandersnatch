@@ -11,9 +11,9 @@ clean:
 	find . -type d -name '__pycache__' -exec rm -rf {} +
 
 gen_test_vec:
-	sage sage/field.sage > tests/vectors/field.py
-	sage sage/montgomery.sage > tests/vectors/montgomery.py
-	sage sage/edwards.sage > tests/vectors/edwards.py
+	sage sage/bandersnatch_field.sage > tests/vectors/bandersnatch_field.py
+	sage sage/bandersnatch_montgomery.sage > tests/vectors/bandersnatch_montgomery.py
+	sage sage/bandersnatch_edwards.sage > tests/vectors/bandersnatch_edwards.py
 	make clean
 
 test:

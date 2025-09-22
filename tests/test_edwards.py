@@ -10,15 +10,15 @@ class TestEdwards(unittest.TestCase):
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
 
-        Test vectors generated using the file `tests/vectors/edwards.sage`.
+        Test vectors generated using the file `sage/bandersnatch_edwards.sage`.
 
         """
         try:
-            with open('tests/vectors/edwards.py', "r") as file:
+            with open('tests/vectors/bandersnatch_edwards.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
-                "The file 'tests/vectors/edwards.py' was not found. Please generate it using `sage Edwards_edwards_test_vectors.sage > Edwards_edwards_test_vectors.py`.")
+                "The file 'tests/vectors/bandersnatch_edwards.py' was not found. Please generate it using `sage sage/bandersnatch.sage > tests/bandersnatch_edwards.py`.")
         return E, test_vectors  # type: ignore
 
     def test_j_invariant(self):
