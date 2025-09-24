@@ -205,23 +205,7 @@ class TestEd25519Montgomery(unittest.TestCase):
         E, test_vectors = self.set_up_curve()
         # self.assertTrue(test_vectors['p'].is_prime_order(E.r))
 
-    # def test_scalar_mul(self):
-    #     """k*p from test vectors"""
-    #     E, test_vectors = self.set_up_curve()
-    #     k = test_vectors['k']
-    #     k_times_p = test_vectors['p'].naive_mul(k)
-    #     print(k_times_p.normalize())
-    #     print(test_vectors['k_times_p'])
-    #     self.assertEqual(k_times_p, test_vectors['k_times_p'])
-
     def test_scalar_mul_negation(self):
         """k*p and -k*p"""
         E, test_vectors = self.set_up_curve()
         self.assertEqual(-12345*test_vectors['p'], 12345*test_vectors['p'])
-
-    # def test_mul_rfc_7748(self):
-    #     E, test_vectors = self.set_up_curve()
-    #     k = 13  # test_vectors['k']
-    #     k_times_p = test_vectors['p'].mul_rfc_7748(k)
-    #     k_times_p_naive = test_vectors['p'].naive_mul(k)
-    #     self.assertEqual(k_times_p, k_times_p_naive)
