@@ -1,4 +1,4 @@
-# File generated using `sage sage/bandersnatch_montgomery.sage > tests/vectors/bandersnatch_montgomery.py`.
+# File generated from RFC 7748.
 from src.curve.edwards import Edwards
 from src.field import Field
 from src.curve.montgomery import Montgomery
