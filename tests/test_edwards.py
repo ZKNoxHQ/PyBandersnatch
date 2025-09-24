@@ -5,7 +5,7 @@ from src.curve.edwards import Edwards
 from random import randint
 
 
-class TestEdwards(unittest.TestCase):
+class TestBandersnatchEdwards(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
@@ -205,6 +205,47 @@ class TestEdwards(unittest.TestCase):
         # self.assertTrue(p_order_2_2.is_prime_order(2))
         # p_order_2_3 = test_vectors['p_order_2_3']
         # self.assertTrue(p_order_2_3.is_prime_order(2))
+
+    def test_encode_decode(self):
+        E, test_vectors = self.set_up_curve()
+        p = test_vectors['p']
+        enc_p = p.encode_base(256)
+        assert E.decode_base(enc_p, 256) == p
+
+
+class TestEd25519Edwards(unittest.TestCase):
+
+    def set_up_curve(self):
+        """Creates Ed25519 elliptic curve.
+
+        Test vectors obtained from RFC 7748.
+
+        """
+        try:
+            with open('tests/vectors/ed25519_edwards.py', "r") as file:
+                exec(file.read(), globals())
+        except FileNotFoundError as e:
+            raise unittest.SkipTest(
+                "The file 'tests/vectors/bandersnatch_edwards.py' was not found. Please generate the test vectors from RFC 7748.")
+        return E, test_vectors  # type: ignore
+
+    def test_in_curve(self):
+        """Point is on the curve"""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(test_vectors['p'].in_curve())
+        # self.assertTrue(test_vectors['k_times_p'].in_curve())
+
+    def test_cofactor(self):
+        """h*p is of order r"""
+        E, _ = self.set_up_curve()
+        for i in range(10):
+            p = E.random().naive_mul(E.h)
+            self.assertTrue(p.is_prime_order(E.r))
+
+    def test_is_prime_order(self):
+        """p is of prime order r"""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(test_vectors['p'].is_prime_order(E.r))
 
     def test_encode_decode(self):
         E, test_vectors = self.set_up_curve()

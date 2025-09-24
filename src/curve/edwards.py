@@ -6,6 +6,7 @@ from gmpy2 import mpq, mpz, mod
 
 class Edwards:
     def __init__(self, a, d, r, h, g=None, glv=False):
+        self.glv = glv
         self.field = a.field
         self.a = a
         self.d = d
@@ -13,11 +14,10 @@ class Edwards:
         self.h = h
         if g == None:
             g = h * self.random()
-            while r * g != 0:
+            while not ((r*g).is_zero()):
                 g = h*self.random()
         else:
             self.generator = self.Point(g[0], g[1], g[2], self)
-        self.glv = glv
 
     def __repr__(self):
         return "Edwards curve defined by {}*x^2 + y^2 = 1 + {} * x^2*y^2".format(self.a, self.d)
@@ -93,6 +93,9 @@ class Edwards:
 
         def __repr__(self):
             return "Point ({}, {}, {})".format(self.x, self.y, self.z)
+
+        def is_zero(self):
+            return self == self.curve(0, 1, 1)
 
         def __eq__(self, other):
             """Return the equality boolean between `self` and `other`.

@@ -3,7 +3,7 @@ import unittest
 import os
 
 
-class FieldBase:
+class TestField:
     VECTOR_FILE = None
 
     def set_up_field(self):
@@ -44,9 +44,9 @@ class FieldBase:
             self.assertTrue(F(i).is_square())
 
 
-class TestBandersnatchField(FieldBase, unittest.TestCase):
+class TestBandersnatchField(TestField, unittest.TestCase):
     VECTOR_FILE = "bandersnatch_field.py"
 
 
-class TestEd25519Field(FieldBase, unittest.TestCase):
+class TestEd25519Field(TestField, unittest.TestCase):
     VECTOR_FILE = "ed25519_field.py"
