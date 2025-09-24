@@ -15,15 +15,21 @@ def constant_time_swap(swap_flag, a, b):
 
 
 class Montgomery:
-    def __init__(self, a, b, r, h, glv=False):
+    def __init__(self, a, b, r, h, g=None, glv=False):
+        self.glv = glv
         self.field = a.field
         self.a = a
         self.b = b
         self.r = r
         self.h = h
         self.a24 = (self.a+2)/4
-        self.generator = self.Point(self.field(0xa), self.field(1), self)
-        self.glv = glv
+        if g == None:
+            self.generator = h * self.random()
+            while not ((r*self.generator).is_zero()):
+                self.generator = h * self.random()
+        else:
+            self.generator = self.Point(
+                self.field(g[0]), self.field(g[1]), self)
 
     def __repr__(self):
         return "Montgomery curve defined by {}*y^2 = x^3 + {}*x^2 + x".format(self.b, self.a)
@@ -81,6 +87,9 @@ class Montgomery:
             The equality is defined modulo {±1}.
             """
             return self.x * other.z == other.x * self.z
+
+        def is_zero(self):
+            return self.z == 0
 
         def normalize(self):
             """Affine representation of the projective point."""

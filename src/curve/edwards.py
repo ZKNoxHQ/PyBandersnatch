@@ -13,9 +13,9 @@ class Edwards:
         self.r = r
         self.h = h
         if g == None:
-            g = h * self.random()
-            while not ((r*g).is_zero()):
-                g = h*self.random()
+            self.generator = h * self.random()
+            while not ((r*self.generator).is_zero()):
+                self.generator = h*self.random()
         else:
             self.generator = self.Point(g[0], g[1], g[2], self)
 
