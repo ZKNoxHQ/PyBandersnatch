@@ -5,14 +5,18 @@ from gmpy2 import mpq, mpz, mod
 
 
 class Edwards:
-    def __init__(self, a, d, r, h, glv=False):
+    def __init__(self, a, d, r, h, g=None, glv=False):
         self.field = a.field
         self.a = a
         self.d = d
         self.r = r
         self.h = h
-        self.generator = self.Point(self.field(3), self.field(
-            0x2d418cc584d9c9df8750a436fac98068949d14c7bdce4034fe792e4c14e30a3f), self.field(1), self)
+        if g == None:
+            g = h * self.random()
+            while r * g != 0:
+                g = h*self.random()
+        else:
+            self.generator = self.Point(g[0], g[1], g[2], self)
         self.glv = glv
 
     def __repr__(self):
