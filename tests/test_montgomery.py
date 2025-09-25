@@ -209,3 +209,4 @@ class TestEd25519Montgomery(unittest.TestCase):
         """k*p and -k*p"""
         E, test_vectors = self.set_up_curve()
         self.assertEqual(-12345*test_vectors['p'], 12345*test_vectors['p'])
+    
