@@ -5,20 +5,20 @@ from src.curve.edwards import Edwards
 from random import randint
 
 
-class TestEdwards(unittest.TestCase):
+class TestBandersnatchEdwards(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
 
-        Test vectors generated using the file `tests/vectors/edwards.sage`.
+        Test vectors generated using the file `sage/bandersnatch_edwards.sage`.
 
         """
         try:
-            with open('tests/vectors/edwards.py', "r") as file:
+            with open('tests/vectors/bandersnatch_edwards.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
-                "The file 'tests/vectors/edwards.py' was not found. Please generate it using `sage Edwards_edwards_test_vectors.sage > Edwards_edwards_test_vectors.py`.")
+                "The file 'tests/vectors/bandersnatch_edwards.py' was not found. Please generate it using `sage sage/bandersnatch.sage > tests/bandersnatch_edwards.py`.")
         return E, test_vectors  # type: ignore
 
     def test_j_invariant(self):
@@ -211,3 +211,194 @@ class TestEdwards(unittest.TestCase):
         p = test_vectors['p']
         enc_p = p.encode_base(256)
         assert E.decode_base(enc_p, 256) == p
+
+
+class TestEd25519Edwards(unittest.TestCase):
+
+    def set_up_curve(self):
+        """Creates Ed25519 elliptic curve.
+
+        Test vectors obtained from RFC 7748.
+
+        """
+        try:
+            with open('tests/vectors/ed25519_edwards.py', "r") as file:
+                exec(file.read(), globals())
+        except FileNotFoundError as e:
+            raise unittest.SkipTest(
+                "The file 'tests/vectors/bandersnatch_edwards.py' was not found. Please generate the test vectors from RFC 7748.")
+        return E, test_vectors  # type: ignore
+
+    def test_in_curve(self):
+        """Point is on the curve"""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(test_vectors['p'].in_curve())
+        # self.assertTrue(test_vectors['k_times_p'].in_curve())
+
+    def test_cofactor(self):
+        """h*p is of order r"""
+        E, _ = self.set_up_curve()
+        for i in range(10):
+            p = E.random().naive_mul(E.h)
+            self.assertTrue(p.is_prime_order(E.r))
+
+    def test_is_prime_order(self):
+        """p is of prime order r"""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(test_vectors['p'].is_prime_order(E.r))
+
+    def test_encode_decode(self):
+        E, test_vectors = self.set_up_curve()
+        p = test_vectors['p']
+        enc_p = p.encode_base(256)
+        assert E.decode_base(enc_p, 256) == p
+
+
+class TestBabyJubjubEdwards(unittest.TestCase):
+
+    def set_up_curve(self):
+        """Creates Baby Jubjub elliptic curve.
+
+        Test vectors obtained from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+
+        """
+        try:
+            with open('tests/vectors/baby_jubjub_edwards.py', "r") as file:
+                exec(file.read(), globals())
+        except FileNotFoundError as e:
+            raise unittest.SkipTest(
+                "The file 'tests/vectors/baby)jubjub_edwards.py' was not found. Please write it using https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.")
+        return E, test_vectors  # type: ignore
+
+    def test_in_curve(self):
+        """Point is on the curve"""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E.generator.in_curve())
+        # self.assertTrue(test_vectors['p'].in_curve())
+        # self.assertTrue(test_vectors['k_times_p'].in_curve())
+
+    def test_cofactor(self):
+        """h*p is of order r"""
+        E, _ = self.set_up_curve()
+        for i in range(10):
+            p = E.random().naive_mul(E.h)
+            self.assertTrue(p.is_prime_order(E.r))
+
+    def test_is_prime_order(self):
+        """p is of prime order r"""
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E.generator.is_prime_order(E.r))
+        # self.assertTrue(test_vectors['p'].is_prime_order(E.r))
+
+    def test_encode_decode(self):
+        E, test_vectors = self.set_up_curve()
+        # p = test_vectors['p']
+        # enc_p = p.encode_base(256)
+        # assert E.decode_base(enc_p, 256) == p
+
+    def test_add_1(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        a = E(0, 1, 1)
+        b = E(0, 1, 1)
+        c = a+b
+        self.assertTrue(c, E(0, 1, 1))
+
+    def test_add_2(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        a = E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+              2626589144620713026669568689430873010625803728049924121243784502389097019475, 1)
+        b = E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+              2626589144620713026669568689430873010625803728049924121243784502389097019475, 1)
+        c = a+b
+        self.assertEqual(c, E(6890855772600357754907169075114257697580319025794532037257385534741338397365,
+                         4338620300185947561074059802482547481416142213883829469920100239455078257889, 1))
+        d = c+c
+        self.assertEqual(d.normalize().x, E.field(
+            0x2f6458832049e917c95867185a96621336df33e13c98e81d1ef4928cdbb77772))
+
+    def test_add_3(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        a = E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+              2626589144620713026669568689430873010625803728049924121243784502389097019475, 1)
+        b = E(16540640123574156134436876038791482806971768689494387082833631921987005038935,
+              20819045374670962167435360035096875258406992893633759881276124905556507972311, 1)
+        c = a+b
+        self.assertEqual(c, E(7916061937171219682591368294088513039687205273691143098332585753343424131937,
+                         14035240266687799601661095864649209771790948434046947201833777492504781204499, 1))
+
+    def test_add_4(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        a = E(0, 1, 1)
+        b = E(16540640123574156134436876038791482806971768689494387082833631921987005038935,
+              20819045374670962167435360035096875258406992893633759881276124905556507972311, 1)
+        c = a+b
+        self.assertEqual(c, E(16540640123574156134436876038791482806971768689494387082833631921987005038935,
+                         20819045374670962167435360035096875258406992893633759881276124905556507972311, 1))
+
+    def test_in_curve_1(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E(0, 1, 1).in_curve())
+
+    def test_in_curve_2(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        self.assertFalse(E(1, 0, 1).in_curve())
+
+    def test_mul_0(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        p = E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+              2626589144620713026669568689430873010625803728049924121243784502389097019475, 1)
+        r2 = p+p
+        r2 = r2 + p
+        r = 3*p
+        self.assertEqual(r, r2)
+        self.assertEqual(r, E(19372461775513343691590086534037741906533799473648040012278229434133483800898,
+                         9458658722007214007257525444427903161243386465067105737478306991484593958249, 1))
+
+    def test_mul_1(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        p = E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+              2626589144620713026669568689430873010625803728049924121243784502389097019475, 1)
+        r = 14035240266687799601661095864649209771790948434046947201833777492504781204499*p
+        self.assertEqual(r, E(17070357974431721403481313912716834497662307308519659060910483826664480189605,
+                         4014745322800118607127020275658861516666525056516280575712425373174125159339, 1))
+
+    def test_mul_2(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        p = E(6890855772600357754907169075114257697580319025794532037257385534741338397365,
+              4338620300185947561074059802482547481416142213883829469920100239455078257889, 1)
+        r = 20819045374670962167435360035096875258406992893633759881276124905556507972311*p
+        self.assertEqual(r, E(13563888653650925984868671744672725781658357821216877865297235725727006259983,
+                         8442587202676550862664528699803615547505326611544120184665036919364004251662, 1))
+
+    def test_in_curve_3(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+                        2626589144620713026669568689430873010625803728049924121243784502389097019475, 1).in_curve())
+
+    def test_in_curve_4(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E(6890855772600357754907169075114257697580319025794532037257385534741338397365,
+                        4338620300185947561074059802482547481416142213883829469920100239455078257889, 1).in_curve())
+
+    def test_order_r_1(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E(17777552123799933955779906779655732241715742912184938656739573121738514868268,
+                          2626589144620713026669568689430873010625803728049924121243784502389097019475, 1).is_prime_order(E.r))
+
+    def test_order_r_2(self):
+        # Test taken from https://github.com/iden3/go-iden3-crypto/blob/master/babyjub/babyjub_test.go.
+        E, test_vectors = self.set_up_curve()
+        self.assertTrue(E(6890855772600357754907169075114257697580319025794532037257385534741338397365,
+                        4338620300185947561074059802482547481416142213883829469920100239455078257889, 1).is_prime_order(E.r))

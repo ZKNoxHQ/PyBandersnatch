@@ -4,10 +4,24 @@ from src.field import Field
 from src.curve.montgomery import Montgomery
 
 
+def decode_scalar_x25519(hex_string: str) -> int:
+    """Decode X25519 scalar according to RFC 7748.
+    """
+    k_bytes = bytearray.fromhex(hex_string)
+    k_bytes[0] &= 248   # Clear bits 0,1,2
+    k_bytes[31] &= 127  # Clear bit 255
+    k_bytes[31] |= 64   # Set bit 254
+    # Convert bytes to integer (little-endian)
+    return int.from_bytes(k_bytes, 'little')
+
+
 class xECDH:
     def __init__(self, curve, private_key=None):
         self.curve = curve
-        self.private_key = private_key or self.generate_private_key()
+        if private_key == None:
+            self.private_key = self.generate_private_key()
+        else:
+            self.private_key = decode_scalar_x25519(private_key)
         self.public_key = self.generate_public_key()
 
     def generate_private_key(self):

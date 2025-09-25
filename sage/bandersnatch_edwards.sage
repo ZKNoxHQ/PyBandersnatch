@@ -70,7 +70,8 @@ def φ(p):
     assert u**4 == E.a4()/E2.a4() and u**6 == E.a6()/E2.a6()
     rX = phi0(y=1) * u**2
     sX = phi1(y=1) * u**3
-    return (rX(x=x_p, y=y_p), y_p * sX(x=x_p, y=y_p), 1)
+    Fp = E.base_field()
+    return (Fp(rX(x=x_p, y=y_p)), y_p * Fp(sX(x=x_p, y=y_p)), 1)
 
 
 # GENERATION OF TEST VECTORS
@@ -98,7 +99,7 @@ def test_vector_scalar(k, name):
     print("test_vectors['{}'] = {}".format(name, hex(k)))
 
 
-print("# File generated using `sage sage/edwards.sage > tests/vectors/edwards.py`.")
+print("# File generated using `sage sage/bandersnatch_edwards.sage > tests/vectors/bandersnatch_edwards.py`.")
 print("from src.field import Field")
 print("from src.curve.edwards import Edwards")
 print("F = Field({})".format(hex(Fp.characteristic())))
@@ -106,7 +107,7 @@ print("a = F({})".format(a_ed))
 print("d = F({})".format(d_ed))
 print("r = 0x1cfb69d4ca675f520cce760202687600ff8f87007419047174fd06b52876e7e1")
 print("h = 4")
-print("E = Edwards(a, d, r, h)")
+print("E = Edwards(a, d, r, h, glv=True)")
 print("test_vectors = {}")
 test_vector_point(p, 'p')
 test_vector_point(q, 'q')

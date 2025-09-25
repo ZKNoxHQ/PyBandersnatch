@@ -36,7 +36,7 @@ class EdDSA:
         a |= (1 << 254)
         return (a * self.curve.generator).encode_base(256)
 
-    def sign(self, msg):
+    def sign(self, msg: bytes):
         """Signature of a message.
 
         Reference: https://datatracker.ietf.org/doc/html/rfc8032.
@@ -49,11 +49,11 @@ class EdDSA:
         prefix = h[32:]
         A = (a*self.curve.generator).encode_base(256)
         r = int.from_bytes(hashlib.sha512(
-            prefix + str.encode(msg)).digest(), "little") % self.curve.r
+            prefix + msg).digest(), "little") % self.curve.r
         R = r * self.curve.generator
         Rs = R.encode_base(256)
         h = int.from_bytes(hashlib.sha512(
-            Rs+A+str.encode(msg)).digest(), "little") % self.curve.r
+            Rs+A+msg).digest(), "little") % self.curve.r
         s = (r + h * a) % self.curve.r
         return Rs + int.to_bytes(s, 32, "little")
 
@@ -78,7 +78,7 @@ class EdDSA:
         if s >= self.curve.r:
             return False
         h = int.from_bytes(hashlib.sha512(
-            Rs + self.public_key + str.encode(msg)).digest(), "little") % self.curve.r
+            Rs + self.public_key + msg).digest(), "little") % self.curve.r
         s_b_minus_h_A = self.curve.generator.multi_scalar_mul_2(
             s, A, self.curve.r-h)
         return s_b_minus_h_A == R  # sB-hA == R ?

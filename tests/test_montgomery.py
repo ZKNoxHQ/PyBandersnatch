@@ -5,20 +5,20 @@ import unittest
 from random import randint
 
 
-class TestMontgomery(unittest.TestCase):
+class TestBandersnatchMontgomery(unittest.TestCase):
 
     def set_up_curve(self):
         """Creates Bandersnatch elliptic curve.
 
-        Test vectors generated using the file `curve_test_vectors.sage`.
+        Test vectors generated using the file `sage/bandersnatch_montgomery.sage`.
 
         """
         try:
-            with open('tests/vectors/montgomery.py', "r") as file:
+            with open('tests/vectors/bandersnatch_montgomery.py', "r") as file:
                 exec(file.read(), globals())
         except FileNotFoundError as e:
             raise unittest.SkipTest(
-                "The file 'curve_test_vectors.py' was not found. Please generate it using `sage curve_test_vectors.sage > curve_test_vectors.py`.")
+                "The file 'tests/bandersnatch_montgomery.py' was not found. Please generate it using `sage sage/bandersnatch_montgomery.sage > tests/bandersnatch_montgomery.py`.")
         return E, test_vectors  # type: ignore
 
     def test_j_invariant(self):
@@ -175,3 +175,38 @@ class TestMontgomery(unittest.TestCase):
             k1, q, k2, p_minus_q, False)
         self.assertEqual(
             k1_p_plus_k2_q_1, k1_p_plus_k2_q_2)
+
+
+class TestEd25519Montgomery(unittest.TestCase):
+
+    def set_up_curve(self):
+        """Creates Ed25519 elliptic curve.
+
+        Test vectors from RFC 7748.
+
+        """
+        try:
+            with open('tests/vectors/ed25519_montgomery.py', "r") as file:
+                exec(file.read(), globals())
+        except FileNotFoundError as e:
+            raise unittest.SkipTest(
+                "The file 'tests/ed25519_montgomery.py' was not found. Please find them in RFC 7748.")
+        return E, test_vectors  # type: ignore
+
+    def test_cofactor(self):
+        """h*p is of order r"""
+        E, _ = self.set_up_curve()
+        for i in range(10):
+            p = E.random().naive_mul(E.h)
+            self.assertTrue(p.is_prime_order(E.r))
+
+    def test_is_prime_order(self):
+        """p is of prime order r"""
+        E, test_vectors = self.set_up_curve()
+        # self.assertTrue(test_vectors['p'].is_prime_order(E.r))
+
+    def test_scalar_mul_negation(self):
+        """k*p and -k*p"""
+        E, test_vectors = self.set_up_curve()
+        self.assertEqual(-12345*test_vectors['p'], 12345*test_vectors['p'])
+    

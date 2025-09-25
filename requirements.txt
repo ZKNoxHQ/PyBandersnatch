@@ -1,1 +1,1 @@
-gmpy2==2.1.5
+git+https://github.com/aleaxit/gmpy.git # gmpy2==2.1.5
